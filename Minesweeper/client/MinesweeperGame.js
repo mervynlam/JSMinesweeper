@@ -32,12 +32,12 @@ const WON = "won";
 const LOST = "lost";
 const IN_PLAY = "in-play";
 
-let gameID = 123;
-//var gamesWon = 0;
-//var gamesLost = 0;
-//var gamesAbandoned = 0;
+var gameID = 123;
+var gamesWon = 0;
+var gamesLost = 0;
+var gamesAbandoned = 0;
 
-let ngCancel = false;
+var ngCancel = false;
 
 const FIND_3BV = 1;     // 1 for high 3BV, -1 for low
 const FIND_3BV_CYCLES = 0;
@@ -47,7 +47,7 @@ function getNextGameID() {
 
     gameID++;
 
-    const reply = { "id": gameID };
+    var reply = { "id": gameID };
 
     return reply;
 
@@ -58,7 +58,7 @@ function copyGame(id) {
 
 	console.log("Replaying game " + id);
 
-	const game = getGame(id);
+	var game = getGame(id);
 
 	if (game == null) {
 		console.log("Game " + id + " not found");
@@ -68,30 +68,29 @@ function copyGame(id) {
 
 	game.reset();
 
-	const reply = {};
+	var reply = {};
 	reply.id = game.getID();
 
 	return reply;
 
 }
 
-// called from main.js
 function createGameFromMFB(blob) {
 
-	const width = blob[0];
-	const height = blob[1];
-	const mines = blob[2] * 256 + blob[3];
+	var width = blob[0];
+	var height = blob[1];
+	var mines = blob[2] * 256 + blob[3];
 
-	const id = gameID++;
+	var id = gameID++;
 
-	const game = new ServerGame(id, width, height, mines, 0, 0, "safe");
+	var game = new ServerGame(id, width, height, mines, 0, 0, "safe");
 
 	game.resetMines(blob);
 	game.generateMbfUrl();
 
 	serverGames.set(id, game);
 
-	const reply = {};
+	var reply = {};
 	reply.id = id;
 
 	return reply;
@@ -103,9 +102,11 @@ function heartbeat() {
 	
 	console.log("heartbeat starting...");
 
-    for (let game of serverGames.values()) {
+    for (var game of serverGames.values()) {
 
-        let action;
+        //var game = games[i];
+
+        var action;
         if (game.cleanUp) {
             action = "Being removed due to cleanUp flag";
             serverGames.delete(game.getID());
@@ -122,9 +123,9 @@ function heartbeat() {
 // used to mark a game as no longer required
 function killGame(message) {
 
-    const id = message.id;
+    var id = message.id;
 
-    const game = getGame(id);
+    var game = getGame(id);
 
     // if we found the game then mark for clean-up
     if (game != null) {
@@ -147,31 +148,31 @@ function killGame(message) {
  */
 
 // this holds the games being played
-const serverGames = new Map();
+var serverGames = new Map();
 
 
 // read the data message and perform the actions
 async function handleActions(message) {
 	
-	const header = message.header;
+	var header = message.header;
 	
 	if (header == null) {
 		console.log("Header is missing");
 		return;
 	}
 
-	const reply = {"header" : {}, "tiles" : []};
+	var reply = {"header" : {}, "tiles" : []};
 
     reply.header.id = header.id;   // reply with the same game id
 	
-	const actions = message.actions;
+	var actions = message.actions;
 
 	if (actions == null) {
         reply.header.status = IN_PLAY;
  		return reply;
 	}
 	
-	let game = getGame(header.id);
+	var game = getGame(header.id);
 	
 	if (game == null) {
 		if (docNgMode.checked) {
@@ -194,16 +195,16 @@ async function handleActions(message) {
 	}
 
 	// process each action sent
-	for (let i = 0; i < actions.length; i++) {
-		const action = actions[i];
+	for (var i = 0; i < actions.length; i++) {
+		var action = actions[i];
 		
 		var tile = game.getTile(action.index);  
 		
 		if (action.action == ACTION_CLEAR) {  // click tile
-			const revealedTiles = game.clickTile(tile);
+			var revealedTiles = game.clickTile(tile);
 
 			// get all the tiles revealed by this click
-			for (let j=0; j < revealedTiles.tiles.length; j++) {
+			for (var j=0; j < revealedTiles.tiles.length; j++) {
 				reply.tiles.push(revealedTiles.tiles[j]);   // add each of the results of clicking to the reply
 			}
 
@@ -220,10 +221,10 @@ async function handleActions(message) {
 			reply.tiles.push({"action" : 2, "index" : action.index, "flag" : tile.isFlagged()});    // set or remove flag
 
 		} else if (action.action == ACTION_CHORD) {  // chord
-			let revealedTiles = game.chordTile(tile);
+			var revealedTiles = game.chordTile(tile);
 
 			// get all the tiles revealed by this chording
-			for (let j=0; j < revealedTiles.tiles.length; j++) {
+			for (var j=0; j < revealedTiles.tiles.length; j++) {
 				reply.tiles.push(revealedTiles.tiles[j]);   // add each of the results of chording to the reply
 			}
 			
@@ -245,11 +246,10 @@ async function handleActions(message) {
     if (reply.header.status == LOST) {
 
 		reply.header.value3BV = game.value3BV;
-		reply.header.solved3BV = game.cleared3BV;
 
-		for (let i = 0; i < game.tiles.length; i++) {
+		for (var i = 0; i < game.tiles.length; i++) {
 
-            const tile = game.tiles[i];
+            var tile = game.tiles[i];
 
             if (!tile.isFlagged() && tile.isBomb()) {
                 if (tile.exploded) {
@@ -263,12 +263,10 @@ async function handleActions(message) {
             }
 
         }
-		game.cleanUp = true;  // mark for housekeeping
-
+        game.cleanUp = true;  // mark for housekeeping
 	} else if (reply.header.status == WON) {
 
 		reply.header.value3BV = game.value3BV;
-		reply.header.solved3BV = game.cleared3BV;
         game.cleanUp = true;  // mark for housekeeping
     }
 
@@ -283,8 +281,8 @@ function getGame(id) {
 
 function createGame(header, index) {
 
-	let cycles;
-    let seed;
+	var cycles;
+    var seed;
     if (header.seed != null && header.seed != 0) {
 		seed = header.seed;
 		cycles = 0;
@@ -293,11 +291,11 @@ function createGame(header, index) {
 		cycles = FIND_3BV_CYCLES - 1;
     }
 
-	let game = new ServerGame(header.id, header.width, header.height, header.mines, index, seed, header.gametype);
+	var game = new ServerGame(header.id, header.width, header.height, header.mines, index, seed, header.gametype);
 
 	while (cycles > 0) {
 		seed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-		const tryGame = new ServerGame(header.id, header.width, header.height, header.mines, index, seed, header.gametype);
+		var tryGame = new ServerGame(header.id, header.width, header.height, header.mines, index, seed, header.gametype);
 		if (FIND_3BV * tryGame.value3BV > FIND_3BV * game.value3BV) {
 			game = tryGame;
 		}
@@ -321,41 +319,40 @@ async function createNoGuessGame(header, index) {
 	//ngText.innerHTML = "";
 	//await sleep(500);
 
-	let won = false;
-	let loopCheck = 0;
-	let minTilesLeft = Number.MAX_SAFE_INTEGER;
-	let maxLoops = 100000;
+	var won = false;
+	var loopCheck = 0;
+	//var bestSeed;
+	var minTilesLeft = Number.MAX_SAFE_INTEGER;
+	var maxLoops = 100000;
 	ngCancel = false;
 
-	const options = {};
+	var options = {};
 	options.playStyle = PLAY_STYLE_NOFLAGS;
 	options.verbose = false;
 	options.advancedGuessing = false;
 
-	const startTime = Date.now();
+	var startTime = Date.now();
 
-	let revealedTiles;
-	let game
 	while (!won && loopCheck < maxLoops && !ngCancel) {
 
-		const seed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+		var seed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
 
-		game = new ServerGame(header.id, header.width, header.height, header.mines, index, seed, "zero");
+		var game = new ServerGame(header.id, header.width, header.height, header.mines, index, seed, "zero");
 
-		const board = new Board(header.id, header.width, header.height, header.mines, seed, "zero");
+		var board = new Board(header.id, header.width, header.height, header.mines, seed, "zero");
 
-		const tile = game.getTile(index);
+		var tile = game.getTile(index);
 
-		revealedTiles = game.clickTile(tile);
+		var revealedTiles = game.clickTile(tile);
 		applyResults(board, revealedTiles);
 
-		let guessed = false;
+		var guessed = false;
 		while (revealedTiles.header.status == IN_PLAY && loopCheck < maxLoops && !guessed && !ngCancel) {
 
 			loopCheck++;
 
 			if (loopCheck % 100 == 0) {
-				const curTime = Date.now();
+				var curTime = Date.now();
 				if (curTime - startTime > 1000) {
 					ngText.innerHTML = "Working " + loopCheck;
 					ngModal.style.display = "block";
@@ -363,12 +360,12 @@ async function createNoGuessGame(header, index) {
                 }
             }
 
-			const reply = await solver(board, options);  // look for solutions
+			var reply = await solver(board, options);  // look for solutions
 
-			const fillers = reply.fillers;
-			for (let i = 0; i < fillers.length; i++) {
+			var fillers = reply.fillers;
+			for (var i = 0; i < fillers.length; i++) {
 
-				const filler = fillers[i];
+				var filler = fillers[i];
 
 				revealedTiles = game.fix(filler);
 
@@ -376,17 +373,16 @@ async function createNoGuessGame(header, index) {
 
             }
 
-			let actions;
 			if (fillers.length > 0) {
-				actions = [];
+				var actions = [];
 				console.log("tiles left " + game.tilesLeft);
 			} else {
-				actions = reply.actions;
+				var actions = reply.actions;
             }
 
-			for (let i = 0; i < actions.length; i++) {
+			for (var i = 0; i < actions.length; i++) {
 
-				const action = actions[i];
+				var action = actions[i];
 
 				if (action.action == ACTION_CHORD) {
 					console.log("Got a chord request!");
@@ -401,9 +397,9 @@ async function createNoGuessGame(header, index) {
 						break;
 					}
 
-					const tile1 = game.getTile(board.xy_to_index(action.x, action.y));
+					tile = game.getTile(board.xy_to_index(action.x, action.y));
 
-					revealedTiles = game.clickTile(tile1);
+					revealedTiles = game.clickTile(tile);
 
 					if (revealedTiles.header.status != IN_PLAY) {  // if won or lost nothing more to do
 						break;
@@ -411,6 +407,9 @@ async function createNoGuessGame(header, index) {
 
 					applyResults(board, revealedTiles);
 
+					//if (action.prob != 1) {  // do no more actions after a guess
+					//	break;
+					//}
 				}
 			}
 
@@ -419,6 +418,7 @@ async function createNoGuessGame(header, index) {
 		console.log("Seed " + seed + " tiles left " + game.tilesLeft);
 		if (game.tilesLeft < minTilesLeft) {
 			minTilesLeft = game.tilesLeft;
+			//bestSeed = seed;
         }
 
 		if (revealedTiles.header.status == WON) {
@@ -459,14 +459,14 @@ function applyResults(board, revealedTiles) {
 	//console.log(revealedTiles);
 
 	// apply the changes to the logical board
-	for (let i = 0; i < revealedTiles.tiles.length; i++) {
+	for (var i = 0; i < revealedTiles.tiles.length; i++) {
 
-		const target = revealedTiles.tiles[i];
+		var target = revealedTiles.tiles[i];
 
-		const index = target.index;
-		const action = target.action;
+		var index = target.index;
+		var action = target.action;
 
-		const tile = board.getTile(index);
+		var tile = board.getTile(index);
 
 		if (action == 1) {    // reveal value on tile
 			tile.setValue(target.value);
@@ -522,7 +522,6 @@ class ServerGame {
         this.seed = seed;
 		this.cleanUp = false;
 		this.actions = 0;
-		this.cleared3BV = 0;
 		this.startIndex = index;
 
         //console.log("Using seed " + this.seed);
@@ -544,12 +543,12 @@ class ServerGame {
 		this.adj_offset[7] =  + width + 1;
 		
 		// hold the tiles to exclude from being a mine 
-		const exclude = {};
+		var exclude = {};
 		exclude[index] = true;
 		var excludeCount = 1;
 
 		if (this.gameType == "zero") {
-            for (let adjIndex of this.getAdjacentIndex(index)) {
+            for (var adjIndex of this.getAdjacentIndex(index)) {
 				exclude[adjIndex] = true;
 				excludeCount++;
             }
@@ -572,12 +571,11 @@ class ServerGame {
 
 		this.cleanUp = false;
 		this.actions = 0;
-		this.cleared3BV = 0;
 		this.started = false;
 		this.tilesLeft = this.width * this.height - this.num_bombs;
 
-		for (let i = 0; i < this.tiles.length; i++) {
-			const tile = this.tiles[i];
+		for (var i = 0; i < this.tiles.length; i++) {
+			var tile = this.tiles[i];
 			tile.reset();
 		}
 
@@ -590,23 +588,23 @@ class ServerGame {
 	resetMines(blob) {
 
 		// reset every tile and it isn't a bomb
-		for (let i = 0; i < this.tiles.length; i++) {
-			const tile = this.tiles[i];
+		for (var i = 0; i < this.tiles.length; i++) {
+			var tile = this.tiles[i];
 			tile.reset();
 			tile.is_bomb = false;
 			tile.value = 0;
 		}
 
-		let index = 4;
+		var index = 4;
 
 		// set the tiles in the mbf to mines
 		while (index < blob.length) {
-			const i = blob[index + 1] * this.width + blob[index];
+			var i = blob[index + 1] * this.width + blob[index];
 
-			const tile = this.tiles[i];
+			var tile = this.tiles[i];
 
 			tile.make_bomb();
-			for (let adjTile of this.getAdjacent(tile)) {
+			for (var adjTile of this.getAdjacent(tile)) {
 				adjTile.value += 1;
 			}
 
@@ -637,7 +635,7 @@ class ServerGame {
 	// clicks the assigned tile and returns an object containing a list of tiles cleared
 	clickTile(tile) {
 		
-        const reply = { "header": {}, "tiles": [] };
+        var reply = { "header": {}, "tiles": [] };
 
         // are we clicking on a mine
 		if (tile.isBomb()) {
@@ -651,7 +649,7 @@ class ServerGame {
 			if (tile.isCovered() && !tile.isFlagged()) {    // make sure the tile is clickable
 				this.actions++;
 
-				const tilesToReveal = [];
+				var tilesToReveal = [];
 				tilesToReveal.push(tile);
 				return this.reveal(tilesToReveal);
 			} else {
@@ -667,10 +665,12 @@ class ServerGame {
 	// clicks the tiles adjacent to the assigned tile and returns an object containing a list of tiles cleared
 	chordTile(tile) {
 		
-        const reply = { "header": {}, "tiles": [] };
+        var reply = { "header": {}, "tiles": [] };
  		
-		let flagCount = 0;
-		for (let adjTile of this.getAdjacent(tile)) {
+		//var adjTiles = this.getAdjacent(tile);
+		
+		var flagCount = 0;
+		for (var adjTile of this.getAdjacent(tile)) {
 			if (adjTile.isFlagged()) {
 				flagCount++;
 			}
@@ -684,8 +684,8 @@ class ServerGame {
 		}
 		
 		// see if there are any unflagged bombs in the area to be chorded - this loses the game
-		let bombCount = 0;
-		for (let adjTile of this.getAdjacent(tile)) {
+		var bombCount = 0;
+		for (var adjTile of this.getAdjacent(tile)) {
             if (adjTile.isBomb() && !adjTile.isFlagged()) {
                 adjTile.exploded = true;
 				bombCount++;
@@ -701,7 +701,7 @@ class ServerGame {
 			return reply;
 		}
 		
-		const tilesToReveal = [];
+		var tilesToReveal = [];
 
 		this.actions++;
 
@@ -718,24 +718,21 @@ class ServerGame {
 	
 	reveal(firstTiles) {
 		
-		const toReveal = [];
-		let soFar = 0;
+		var toReveal = [];
+		var soFar = 0;
 		
-        const reply = { "header": {}, "tiles": [] };
+        var reply = { "header": {}, "tiles": [] };
 		
-		for (let firstTile of firstTiles) {
-			firstTile.setNotCovered();
-			if (firstTile.is3BV) {
-				this.cleared3BV++;
-            }
+		for (var firstTile of firstTiles) {
+			firstTile.setNotCovered(); 
 			toReveal.push(firstTile);			
 		}
 		
-		let safety = 100000;
+		var safety = 100000;
 		
 		while (soFar < toReveal.length) {
 			
-			const tile = toReveal[soFar];
+			var tile = toReveal[soFar];
 
 			reply.tiles.push({"action" : 1, "index" : tile.getIndex(), "value" : tile.getValue()});   		
 			this.tilesLeft--;
@@ -743,13 +740,10 @@ class ServerGame {
 			// if the value is zero then for each adjacent tile not yet revealed add it to the list
 			if (tile.getValue() == 0) {
 				
-				for (let adjTile of this.getAdjacent(tile)) {
+				for (var adjTile of this.getAdjacent(tile)) {
 					
 					if (adjTile.isCovered() && !adjTile.isFlagged()) {  // if not covered and not a flag
 						adjTile.setNotCovered();  // it will be uncovered in a bit
-						if (adjTile.is3BV) {
-							this.cleared3BV++;
-						}
 						toReveal.push(adjTile);
 					}
 				}
@@ -766,8 +760,8 @@ class ServerGame {
 
         // if there are no tiles left to find then set the remaining tiles to flagged and we've won
 		if (this.tilesLeft == 0) {
-			for (let i=0; i < this.tiles.length; i++) {
-				const tile = this.tiles[i];
+			for (var i=0; i < this.tiles.length; i++) {
+				var tile = this.tiles[i];
 				if (tile.isBomb() && !tile.isFlagged()) {
 					tile.toggleFlag();
 					reply.tiles.push({"action" : 2, "index" : i, "flag" : tile.isFlagged()});    // auto set remaining flags
@@ -786,10 +780,10 @@ class ServerGame {
 	// fix modify the mines around this withness to make it a safe move
 	fix(filler) {
 
-		const reply = { "header": {}, "tiles": [] };
+		var reply = { "header": {}, "tiles": [] };
 		reply.header.status = IN_PLAY;
 
-		const tile = this.getTile(filler.index);
+		var tile = this.getTile(filler.index);
 
 
 		if (filler.fill) {
@@ -797,7 +791,7 @@ class ServerGame {
 			if (!tile.is_bomb) {  // if filling and not a bomb add a bomb
 				tile.make_bomb();
 				this.num_bombs++;
-				for (let adjTile1 of this.getAdjacent(tile)) {
+				for (var adjTile1 of this.getAdjacent(tile)) {
 					adjTile1.value += 1;
 					if (!adjTile1.isCovered()) {
 						reply.tiles.push({ "action": 1, "index": adjTile1.getIndex(), "value": adjTile1.getValue() });
@@ -810,7 +804,7 @@ class ServerGame {
 			if (tile.is_bomb) {  // if emptying and is a bomb - remove it
 				tile.is_bomb = false;
 				this.num_bombs--;
-				for (let adjTile1 of this.getAdjacent(tile)) {
+				for (var adjTile1 of this.getAdjacent(tile)) {
 					adjTile1.value -= 1;
 					if (!adjTile1.isCovered()) {
 						reply.tiles.push({ "action": 1, "index": adjTile1.getIndex(), "value": adjTile1.getValue() });
@@ -831,8 +825,8 @@ class ServerGame {
 
 		return false;
 
-		let flagCount = 0;
-		let covered = 0;
+		var flagCount = 0;
+		var covered = 0;
 		for (var adjTile of this.getAdjacent(tile)) {
 			if (adjTile.isFlagged()) {
 				flagCount++;
@@ -848,7 +842,7 @@ class ServerGame {
 
 		// all covered tiles are flags
 		if (tile.getValue() == flagCount + covered) {
-			for (let adjTile of this.getAdjacent(tile)) {
+			for (var adjTile of this.getAdjacent(tile)) {
 				if (adjTile.isFlagged()) {
 				} else if (adjTile.isCovered()) {
 					this.flag(adjTile);
@@ -864,8 +858,8 @@ class ServerGame {
 	init_tiles(to_exclude) {
 		
 		// create the tiles
-		const indices = [];
-		for (let i = 0; i < this.width * this.height; i++) {
+		var indices = [];
+		for (var i = 0; i < this.width * this.height; i++) {
 			
 			this.tiles.push(new ServerTile(i));
 			
@@ -874,17 +868,17 @@ class ServerGame {
 			}
         }
 
-        const rng = JSF(this.seed);  // create an RNG based on the seed
+        var rng = JSF(this.seed);  // create an RNG based on the seed
 
 		shuffle(indices,rng);
 		
 		// allocate the bombs and calculate the values
-		for (let i = 0; i < this.num_bombs; i++) {
-			const index = indices[i];
-			const tile = this.tiles[index];
+		for (var i = 0; i < this.num_bombs; i++) {
+			var index = indices[i];
+			var tile = this.tiles[index];
 			
 			tile.make_bomb();
-			for (let adjTile of this.getAdjacent(tile)) {
+			for (var adjTile of this.getAdjacent(tile)) {
 				adjTile.value += 1;
 			}
 		}
@@ -896,22 +890,22 @@ class ServerGame {
 	// returns all the tiles adjacent to this tile
 	getAdjacent(tile) {
 		
-		const index = tile.getIndex();
+		var index = tile.getIndex();
 		
-		const col = index % this.width;
-		const row = Math.floor(index / this.width);
+		var col = index % this.width;
+		var row = Math.floor(index / this.width);
 
-		const first_row = Math.max(0, row - 1);
-		const last_row = Math.min(this.height - 1, row + 1);
+		var first_row = Math.max(0, row - 1);
+		var last_row = Math.min(this.height - 1, row + 1);
 
-		const first_col = Math.max(0, col - 1);
-		const last_col = Math.min(this.width - 1, col + 1);
+		var first_col = Math.max(0, col - 1);
+		var last_col = Math.min(this.width - 1, col + 1);
 
-		const result = []
+		var result = []
 
-		for (let r = first_row; r <= last_row; r++) {
-			for (let c = first_col; c <= last_col; c++) {
-				const i = this.width * r + c;
+		for (var r = first_row; r <= last_row; r++) {
+			for (var c = first_col; c <= last_col; c++) {
+				var i = this.width * r + c;
 				if (i != index) {
 					result.push(this.tiles[i]);
 				}
@@ -924,20 +918,20 @@ class ServerGame {
     // returns all the tiles adjacent to this tile
     getAdjacentIndex(index) {
 
-        const col = index % this.width;
-        const row = Math.floor(index / this.width);
+        var col = index % this.width;
+        var row = Math.floor(index / this.width);
 
-        const first_row = Math.max(0, row - 1);
-        const last_row = Math.min(this.height - 1, row + 1);
+        var first_row = Math.max(0, row - 1);
+        var last_row = Math.min(this.height - 1, row + 1);
 
-        const first_col = Math.max(0, col - 1);
-        const last_col = Math.min(this.width - 1, col + 1);
+        var first_col = Math.max(0, col - 1);
+        var last_col = Math.min(this.width - 1, col + 1);
 
-        const result = []
+        var result = []
 
-        for (let r = first_row; r <= last_row; r++) {
-            for (let c = first_col; c <= last_col; c++) {
-                const i = this.width * r + c;
+        for (var r = first_row; r <= last_row; r++) {
+            for (var c = first_col; c <= last_col; c++) {
+                var i = this.width * r + c;
                 if (i != index) {
                     result.push(i);
                 }
@@ -949,30 +943,29 @@ class ServerGame {
 
 	calculate3BV() {
 
-		let value3BV = 0;
+		var value3BV = 0;
 
-		for (let i = 0; i < this.tiles.length; i++) {
-			const tile = this.tiles[i];
+		for (var i = 0; i < this.tiles.length; i++) {
+			var tile = this.tiles[i];
 
 			if (!tile.used3BV && !tile.isBomb() && tile.getValue() == 0) {
 
 				value3BV++;
 				tile.used3BV = true;
-				tile.is3BV = true;
 
-				const toReveal = [tile];
-				let soFar = 0;
+				var toReveal = [tile];
+				var soFar = 0;
 
-				let safety = 100000;
+				var safety = 100000;
 
 				while (soFar < toReveal.length) {
 
-					const tile1 = toReveal[soFar];
+					var tile1 = toReveal[soFar];
 
 					// if the value is zero then for each adjacent tile not yet revealed add it to the list
 					if (tile1.getValue() == 0) {
 
-						for (let adjTile of this.getAdjacent(tile1)) {
+						for (var adjTile of this.getAdjacent(tile1)) {
 
 							if (!adjTile.used3BV) {
 
@@ -994,11 +987,10 @@ class ServerGame {
             }
 		}
 
-		for (let i = 0; i < this.tiles.length; i++) {
-			const tile = this.tiles[i];
+		for (var i = 0; i < this.tiles.length; i++) {
+			var tile = this.tiles[i];
 			if (!tile.isBomb() && !tile.used3BV) {
 				value3BV++;
-				tile.is3BV = true;
             }
 
 		}
@@ -1025,10 +1017,10 @@ class ServerGame {
 			return null;
 		}
 
-		const length = 4 + 2 * this.num_bombs;
+		var length = 4 + 2 * this.num_bombs;
 
-		const mbf = new ArrayBuffer(length);
-		const mbfView = new Uint8Array(mbf);
+		var mbf = new ArrayBuffer(length);
+		var mbfView = new Uint8Array(mbf);
 
 		mbfView[0] = this.width;
 		mbfView[1] = this.height;
@@ -1036,13 +1028,13 @@ class ServerGame {
 		mbfView[2] = Math.floor(this.num_bombs / 256);
 		mbfView[3] = this.num_bombs % 256;
 
-		let minesFound = 0;
-		let index = 4;
-		for (let i = 0; i < this.tiles.length; i++) {
+		var minesFound = 0;
+		var index = 4;
+		for (var i = 0; i < this.tiles.length; i++) {
 
-			const tile = this.getTile(i);
-			const x = i % this.width;
-			const y = Math.floor(i / this.width);
+			var tile = this.getTile(i);
+			var x = i % this.width;
+			var y = Math.floor(i / this.width);
 
 			if (tile.isBomb()) {
 				minesFound++;
@@ -1060,9 +1052,9 @@ class ServerGame {
 
 		console.log(...mbfView);
 
-		const blob = new Blob([mbf], { type: 'application/octet-stream' })
+		var blob = new Blob([mbf], { type: 'application/octet-stream' })
 
-		const url = URL.createObjectURL(blob);
+		var url = URL.createObjectURL(blob);
 
 		console.log(url);
 
@@ -1091,7 +1083,6 @@ class ServerTile {
         this.exploded = false;
 		this.is_bomb = false;
 		this.used3BV = false;
-		this.is3BV = false;
 	}
 
 	reset() {
@@ -1099,7 +1090,6 @@ class ServerTile {
 		this.is_flagged = false;
 		this.exploded = false;
 		this.used3BV = false;
-		this.is3BV = false;
 	}
 
 	getIndex() {
@@ -1163,12 +1153,12 @@ class gameDescription {
 
 // used to shuffle an array
 function shuffle(a, rng) {
- 
-    for (let i = a.length - 1; i > 0; i--) {
-		const j = Math.floor(rng() * (i + 1));
+    var j, x, i;
+    for (i = a.length - 1; i > 0; i--) {
+		j = Math.floor(rng() * (i + 1));
 		//console.log(j);
         //j = Math.floor(Math.random() * (i + 1));
-        const x = a[i];
+        x = a[i];
         a[i] = a[j];
         a[j] = x;
     }

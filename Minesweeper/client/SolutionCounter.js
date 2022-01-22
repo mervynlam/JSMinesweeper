@@ -5,10 +5,9 @@
 "use strict";
 
 class SolutionCounter {
-
-    static SMALL_COMBINATIONS = [[1], [1, 1], [1, 2, 1], [1, 3, 3, 1], [1, 4, 6, 4, 1], [1, 5, 10, 10, 5, 1], [1, 6, 15, 20, 15, 6, 1], [1, 7, 21, 35, 35, 21, 7, 1], [1, 8, 28, 56, 70, 56, 28, 8, 1]];
-
 	constructor(board, allWitnesses, allWitnessed, squaresLeft, minesLeft) {
+
+       	this.SMALL_COMBINATIONS = [ [ 1 ], [ 1, 1 ], [ 1, 2, 1 ], [ 1, 3, 3, 1 ], [ 1, 4, 6, 4, 1 ], [ 1, 5, 10, 10, 5, 1 ], [ 1, 6, 15, 20, 15, 6, 1 ], [ 1, 7, 21, 35, 35, 21, 7, 1 ], [ 1, 8, 28, 56, 70, 56, 28, 8, 1 ] ];
 
         this.board = board;
 
@@ -51,7 +50,7 @@ class SolutionCounter {
             var boxWit = new BoxWitness(this.board, wit);
 
             // can't have too many or too few mines 
-            if (boxWit.minesToFind < 0 || boxWit.minesToFind > boxWit.tiles.length) {
+            if (boxWit.minesToFind < 0 || boxWit.mineToFind > boxWit.tiles.length) {
                 this.validWeb = false;
             }
 
@@ -313,7 +312,7 @@ class SolutionCounter {
         //console.log("Extended probability line: Adding " + mines + " mines to box " + newBox.uid);
         //console.log("Extended probability line before" + pl.mineBoxCount);
 
-        var combination = SolutionCounter.SMALL_COMBINATIONS[newBox.tiles.length][mines];
+        var combination = this.SMALL_COMBINATIONS[newBox.tiles.length][mines];
         var bigCom = BigInt(combination);
 
         var newSolutionCount = pl.solutionCount * bigCom;
@@ -617,7 +616,7 @@ class SolutionCounter {
     // forces a box to contain a tile which isn't a mine.  If the location isn't in a box false is returned.
     setMustBeEmpty(tile) {
 
-        const box = this.getBox(tile);
+        var box = this.getBox(tile);
 
         if (box == null) {
             this.validWeb = false;

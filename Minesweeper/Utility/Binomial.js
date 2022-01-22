@@ -13,16 +13,21 @@ class Binomial {
 		}
 		this.lookupLimit = lookup;
 
-		const lookup2 = lookup / 2;
+		var lookup2 = lookup / 2;
 
 		this.binomialLookup = Array(lookup + 1);
 
-		for (let total = 1; total <= lookup; total++) {
+		for (var total = 1; total <= lookup; total++) {
 
 			this.binomialLookup[total] = Array(lookup2 + 1);
 
-			for (let choose = 0; choose <= total / 2; choose++) {
-				this.binomialLookup[total][choose] = this.generate(choose, total);
+			for (var choose = 0; choose <= total / 2; choose++) {
+				//try {
+					this.binomialLookup[total][choose] = this.generate(choose, total);
+					//System.out.println("Binomial " + total + " choose " + choose + " is " + binomialLookup[total][choose]);
+				//} catch (e) {
+				//	console.log("Error: " + e);
+				//}
 			}
 
 
@@ -38,12 +43,12 @@ class Binomial {
 		}
 
 		if (n < 1 || n > this.max) {
-			throw new Error("Binomial: 1 <= n and n <= max required, but n was " + n + " and max was " + this.max);
+			throw new Exception("Binomial: 1 <= n and n <= max required, but n was " + n + " and max was " + this.max);
 		}
 
 		if (0 > k || k > n) {
 			console.log("Binomial: 0 <= k and k <= n required, but n was " + n + " and k was " + k);
-			throw new Error("Binomial: 0 <= k and k <= n required, but n was " + n + " and k was " + k);
+			throw new Exception("Binomial: 0 <= k and k <= n required, but n was " + n + " and k was " + k);
 		}
 
 		var choose = Math.min(k, n - k);
@@ -65,18 +70,18 @@ class Binomial {
 	
     combination(mines, squares) {
 
-		let top = BigInt(1);
-		let bot = BigInt(1);
+		var top = BigInt(1);
+		var bot = BigInt(1);
 
-		const range = Math.min(mines, squares - mines);
+		var range = Math.min(mines, squares - mines);
 
 		// calculate the combination. 
-		for (let i = 0; i < range; i++) {
+		for (var i = 0; i < range; i++) {
 			top = top * BigInt(squares - i);
 			bot = bot* BigInt(i + 1);
 		}
 
-		const result = top / bot;
+		var result = top / bot;
 
 		return result;
 
@@ -87,19 +92,19 @@ class Binomial {
 
 		if ((k == 0) || (k == n)) return BigInt(1);
 
-		const n2 = n / 2;
+		var n2 = n / 2;
 
 		if (k > n2) {
 			k = n - k;
 		}
 
-		const nk = n - k;
+		var nk = n - k;
 
-		const rootN = Math.floor(Math.sqrt(n));
+		var rootN = Math.floor(Math.sqrt(n));
 
-		let result = BigInt(1);
+		var result = BigInt(1);
 
-		for (let prime = 2; prime <= n; prime++) {
+		for (var prime = 2; prime <= n; prime++) {
 
 			// we only want the primes
 			if (!this.ps.isPrime(prime)) {
@@ -122,12 +127,12 @@ class Binomial {
 				continue;
 			}
 
-			let r = 0;
-			let N = n;
-			let K = k;
-			let p = 1;
+			var r = 0;
+			var N = n;
+			var K = k;
+			var p = 1;
 
-			let safety = 100;
+			var safety = 100;
 			while (N > 0) {
 				r = (N % prime) < (K % prime + r) ? 1 : 0;
 				if (r == 1) {

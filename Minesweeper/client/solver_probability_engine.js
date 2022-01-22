@@ -5,16 +5,16 @@
 "use strict";
 
 class ProbabilityEngine {
-
-    static SMALL_COMBINATIONS = [[1], [1, 1], [1, 2, 1], [1, 3, 3, 1], [1, 4, 6, 4, 1], [1, 5, 10, 10, 5, 1], [1, 6, 15, 20, 15, 6, 1], [1, 7, 21, 35, 35, 21, 7, 1], [1, 8, 28, 56, 70, 56, 28, 8, 1]];
-
 	constructor(board, allWitnesses, allWitnessed, squaresLeft, minesLeft, options) {
+
+       	this.SMALL_COMBINATIONS = [ [ 1 ], [ 1, 1 ], [ 1, 2, 1 ], [ 1, 3, 3, 1 ], [ 1, 4, 6, 4, 1 ], [ 1, 5, 10, 10, 5, 1 ], [ 1, 6, 15, 20, 15, 6, 1 ], [ 1, 7, 21, 35, 35, 21, 7, 1 ], [ 1, 8, 28, 56, 70, 56, 28, 8, 1 ] ];
 
         this.board = board;
         this.options = options;
         this.playStyle = options.playStyle;
         this.verbose = options.verbose;
 
+		//this.witnesses = allWitnesses;
 		this.witnessed = allWitnessed;
 
         this.duration = 0;
@@ -73,22 +73,22 @@ class ProbabilityEngine {
         }
 
         // generate a BoxWitness for each witness tile and also create a list of pruned witnesses for the brute force search
-        let pruned = 0;
-        for (let i = 0; i < allWitnesses.length; i++) {
-            const wit = allWitnesses[i];
+        var pruned = 0;
+        for (var i = 0; i < allWitnesses.length; i++) {
+            var wit = allWitnesses[i];
 
-            const boxWit = new BoxWitness(this.board, wit);
+            var boxWit = new BoxWitness(this.board, wit);
 
             // can't have too many or too few mines 
-            if (boxWit.minesToFind < 0 || boxWit.minesToFind > boxWit.tiles.length) {
+            if (boxWit.minesToFind < 0 || boxWit.mineToFind > boxWit.tiles.length) {
                 this.validWeb = false;
             }
 
             // if the witness is a duplicate then don't store it
-            let duplicate = false;
-            for (let j = 0; j < this.boxWitnesses.length; j++) {
+            var duplicate = false;
+            for (var j = 0; j < this.boxWitnesses.length; j++) {
 
-                const w = this.boxWitnesses[j];
+                var w = this.boxWitnesses[j];
 
                 if (w.equivalent(boxWit)) {
                     //if (boardState.getWitnessValue(w) - boardState.countAdjacentConfirmedFlags(w) != boardState.getWitnessValue(wit) - boardState.countAdjacentConfirmedFlags(wit)) {
@@ -110,23 +110,23 @@ class ProbabilityEngine {
         this.writeToConsole("There are " + this.boxWitnesses.length + " Box witnesses");
 
 		// allocate each of the witnessed squares to a box
-		let uid = 0;
-		for (let i=0; i < this.witnessed.length; i++) {
+		var uid = 0;
+		for (var i=0; i < this.witnessed.length; i++) {
 			
-			const tile = this.witnessed[i];
+			var tile = this.witnessed[i];
 			
-			let count = 0;
+			var count = 0;
 			
 			// count how many adjacent witnesses the tile has
-			for (let j=0; j < allWitnesses.length; j++) {
+			for (var j=0; j < allWitnesses.length; j++) {
 				if (tile.isAdjacent(allWitnesses[j])) {
 					count++;
 				}
 			}
 			
             // see if the witnessed tile fits any existing boxes
-            let found = false;
-			for (let j=0; j < this.boxes.length; j++) {
+            var found = false;
+			for (var j=0; j < this.boxes.length; j++) {
 				
 				if (this.boxes[j].fits(tile, count)) {
 					this.boxes[j].add(tile);
@@ -144,35 +144,35 @@ class ProbabilityEngine {
         }
 
         // calculate the min and max mines for each box 
-        for (let i = 0; i < this.boxes.length; i++) {
-            const box = this.boxes[i];
+        for (var i = 0; i < this.boxes.length; i++) {
+            var box = this.boxes[i];
             box.calculate(this.minesLeft);
             //console.log("Box " + box.tiles[0].asText() + " has min mines = " + box.minMines + " and max mines = " + box.maxMines);
         }
 
         // Report how many boxes each witness is adjacent to 
-        //for (var i = 0; i < this.boxWitnesses.length; i++) {
-        //    var boxWit = this.boxWitnesses[i];
-        //      console.log("Witness " + boxWit.tile.asText() + " is adjacent to " + boxWit.boxes.length + " boxes and has " + boxWit.minesToFind + " mines to find");
-        //}
+        for (var i = 0; i < this.boxWitnesses.length; i++) {
+            var boxWit = this.boxWitnesses[i];
+            //console.log("Witness " + boxWit.tile.asText() + " is adjacent to " + boxWit.boxes.length + " boxes and has " + boxWit.minesToFind + " mines to find");
+        }
 
  	}
 
     checkForUnavoidableGuess() {
 
-        for (let i = 0; i < this.prunedWitnesses.length; i++) {
-            const witness = this.prunedWitnesses[i];
+        for (var i = 0; i < this.prunedWitnesses.length; i++) {
+            var witness = this.prunedWitnesses[i];
 
             if (witness.minesToFind == 1 && witness.tiles.length == 2) {
 
                 //console.log("Witness " + witness.tile.asText() + " is a possible unavoidable guess witness");
-                let unavoidable = true;
+                var unavoidable = true;
                 // if every monitoring tile also monitors all the other tiles then it can't provide any information
-                check: for (let j = 0; j < witness.tiles.length; j++) {
-                    const tile = witness.tiles[j];
+                check: for (var j = 0; j < witness.tiles.length; j++) {
+                    var tile = witness.tiles[j];
 
                     // get the witnesses monitoring this tile
-                    for (let adjTile of this.board.getAdjacent(tile)) {
+                    for (var adjTile of this.board.getAdjacent(tile)) {
 
                         // ignore tiles which are mines
                         if (adjTile.isSolverFoundBomb()) {
@@ -180,8 +180,8 @@ class ProbabilityEngine {
                         }
 
                         // are we one of the tiles other tiles, if so then no need to check
-                        let toCheck = true;
-                        for (let otherTile of witness.tiles) {
+                        var toCheck = true;
+                        for (var otherTile of witness.tiles) {
                             if (otherTile.isEqual(adjTile)) {
                                 toCheck = false;
                                 break;
@@ -190,7 +190,7 @@ class ProbabilityEngine {
 
                         // if we are monitoring and not a mine then see if we are also monitoring all the other mines
                         if (toCheck) {
-                            for (let otherTile of witness.tiles) {
+                            for (var otherTile of witness.tiles) {
                                 if (!adjTile.isAdjacent(otherTile)) {
 
                                     //console.log("Tile " + adjTile.asText() + " is not monitoring all the other witnessed tiles");
@@ -214,26 +214,26 @@ class ProbabilityEngine {
 
     checkForUnavoidable5050() {
 
-        const links = [];
+        var links = [];
 
-        for (let i = 0; i < this.prunedWitnesses.length; i++) {
-            const witness = this.prunedWitnesses[i];
+        for (var i = 0; i < this.prunedWitnesses.length; i++) {
+            var witness = this.prunedWitnesses[i];
 
             if (witness.minesToFind == 1 && witness.tiles.length == 2) {
 
                 // create a new link
-                const link = new Link();
+                var link = new Link();
                 link.tile1 = witness.tiles[0];
                 link.tile2 = witness.tiles[1];
 
                 //console.log("Witness " + witness.tile.asText() + " is a possible unavoidable guess witness");
-                let unavoidable = true;
+                var unavoidable = true;
                 // if every monitoring tile also monitors all the other tiles then it can't provide any information
-                for (let j = 0; j < witness.tiles.length; j++) {
-                    const tile = witness.tiles[j];
+                for (var j = 0; j < witness.tiles.length; j++) {
+                    var tile = witness.tiles[j];
 
                     // get the witnesses monitoring this tile
-                    for (let adjTile of this.board.getAdjacent(tile)) {
+                    for (var adjTile of this.board.getAdjacent(tile)) {
 
                         // ignore tiles which are mines
                         if (adjTile.isSolverFoundBomb()) {
@@ -241,8 +241,8 @@ class ProbabilityEngine {
                         }
 
                         // are we one of the tiles other tiles, if so then no need to check
-                        let toCheck = true;
-                        for (let otherTile of witness.tiles) {
+                        var toCheck = true;
+                        for (var otherTile of witness.tiles) {
                             if (otherTile.isEqual(adjTile)) {
                                 toCheck = false;
                                 break;
@@ -251,7 +251,7 @@ class ProbabilityEngine {
 
                         // if we are monitoring and not a mine then see if we are also monitoring all the other mines
                         if (toCheck) {
-                            for (let otherTile of witness.tiles) {
+                            for (var otherTile of witness.tiles) {
                                 if (!adjTile.isAdjacent(otherTile)) {
 
                                     //console.log("Tile " + adjTile.asText() + " is not monitoring all the other witnessed tiles");
@@ -270,8 +270,8 @@ class ProbabilityEngine {
                     }
                 }
                 if (unavoidable) {
-                    this.writeToConsole("Tile " + link.tile1.asText() + " is an unavoidable 50/50 guess");
-                    return link.tile1;
+                    this.writeToConsole("Tile " + witness.tile.asText() + " is an unavoidable guess");
+                    return witness.tiles[0];
                 }
 
                 links.push(link);
@@ -279,14 +279,14 @@ class ProbabilityEngine {
         }
 
         // this is the area the 50/50 spans
-        let area5050 = [];
+        var area5050 = [];
 
         // try and connect 2 or links together to form an unavoidable 50/50
-        for (let link of links) {
+        for (var link of links) {
             if (!link.processed && (link.closed1 && !link.closed2 || !link.closed1 && link.closed2)) {  // this is the XOR operator, so 1 and only 1 of these is closed 
 
-                let openTile;
-                let extensions = 0;
+                var openTile;
+                var extensions = 0;
                 if (!link.closed1) {
                     openTile = link.tile1;
                 } else {
@@ -297,11 +297,11 @@ class ProbabilityEngine {
 
                 link.processed = true;
 
-                let noMatch = false;
+                var noMatch = false;
                 while (openTile != null && !noMatch) {
 
                     noMatch = true;
-                    for (let extension of links) {
+                    for (var extension of links) {
                         if (!extension.processed) {
 
                             if (extension.tile1.isEqual(openTile)) {
@@ -366,17 +366,17 @@ class ProbabilityEngine {
     noTrouble(link, area) {
 
         // each trouble location must be adjacent to 2 tiles in the extended 50/50
-        top: for (let tile of link.trouble) {
+        top: for (var tile of link.trouble) {
 
-            for (let tile5050 of area) {
+            for (var tile5050 of area) {
                 if (tile.isEqual(tile5050)) {
                     continue top;    //if a trouble tile is part of the 50/50 it isn't trouble
                 }
             }
 
 
-            let adjCount = 0;
-            for (let tile5050 of area) {
+            var adjCount = 0;
+            for (var tile5050 of area) {
                 if (tile.isAdjacent(tile5050)) {
                     adjCount++;
                 }
@@ -401,7 +401,7 @@ class ProbabilityEngine {
             return;
         }
 
-        const peStart = Date.now();
+        var peStart = Date.now();
 
         // create an array showing which boxes have been procesed this iteration - none have to start with
         this.mask = Array(this.boxes.length).fill(false);
@@ -415,18 +415,22 @@ class ProbabilityEngine {
 		// add an empty probability line to get us started
         this.workingProbs.push(new ProbabilityLine(this.boxes.length, BigInt(1)));
 		
-        let nextWitness = this.findFirstWitness();
+        var nextWitness = this.findFirstWitness();
 
         while (nextWitness != null) {
 
             //console.log("Probability engine processing witness " + nextWitness.boxWitness.tile.asText());
 
             // mark the new boxes as processed - which they will be soon
-            for (let i = 0; i < nextWitness.newBoxes.length; i++) {
+            for (var i = 0; i < nextWitness.newBoxes.length; i++) {
                 this.mask[nextWitness.newBoxes[i].uid] = true;
             }
 
             this.workingProbs = this.mergeProbabilities(nextWitness);
+
+            //if (this.workingProbs.length > 10) {
+            //    console.log("Items in the working array = " + this.workingProbs.length);
+            //}
 
             nextWitness = this.findNextWitness(nextWitness);
 
@@ -454,13 +458,13 @@ class ProbabilityEngine {
     // take the next witness details and merge them into the currently held details
     mergeProbabilities(nw) {
 
-        const newProbs = [];
+        var newProbs = [];
 
-        for (let i = 0; i < this.workingProbs.length; i++) {
+        for (var i = 0; i < this.workingProbs.length; i++) {
 
-            const pl = this.workingProbs[i];
+            var pl = this.workingProbs[i];
 
-            const missingMines = nw.boxWitness.minesToFind - this.countPlacedMines(pl, nw);
+            var missingMines = nw.boxWitness.minesToFind - this.countPlacedMines(pl, nw);
 
             if (missingMines < 0) {
                 //console.log("Missing mines < 0 ==> ignoring line");
@@ -473,7 +477,7 @@ class ProbabilityEngine {
                 // nowhere to put the new mines, so this probability can't be valid
             } else {
                 
-                const result = this.distributeMissingMines(pl, nw, missingMines, 0);
+                var result = this.distributeMissingMines(pl, nw, missingMines, 0);
                 newProbs.push(...result);
 
             }
@@ -483,7 +487,7 @@ class ProbabilityEngine {
         // flag the last set of details as processed
         nw.boxWitness.processed = true;
 
-        for (let i = 0; i < nw.newBoxes.length; i++) {
+        for (var i = 0; i < nw.newBoxes.length; i++) {
             nw.newBoxes[i].processed = true;
         }
 
@@ -495,12 +499,12 @@ class ProbabilityEngine {
         // about to compress the line
         this.canDoDeadTileAnalysis = false;
 
-        const boundaryBoxes = [];
-        for (let i = 0; i < this.boxes.length; i++) {
-            const box = this.boxes[i];
-            let notProcessed = false;
-            let processed = false;
-            for (let j = 0; j < box.boxWitnesses.length; j++) {
+        var boundaryBoxes = [];
+        for (var i = 0; i < this.boxes.length; i++) {
+            var box = this.boxes[i];
+            var notProcessed = false;
+            var processed = false;
+            for (var j = 0; j < box.boxWitnesses.length; j++) {
                 if (box.boxWitnesses[j].processed) {
                     processed = true;
                 } else {
@@ -515,26 +519,26 @@ class ProbabilityEngine {
         }
         //boardState.display("Boxes partially processed " + boundaryBoxes.size());
 
-        const sorter = new MergeSorter(boundaryBoxes);
+        var sorter = new MergeSorter(boundaryBoxes);
 
-        const crunched = this.crunchByMineCount(newProbs, sorter);
+        newProbs = this.crunchByMineCount(newProbs, sorter);
 
         //if (newProbs.length == 0) {
         //     console.log("Returning no lines from merge probability !!");
         //}
 
-         return crunched;
+         return newProbs;
 
     }
 
     // counts the number of mines already placed
     countPlacedMines(pl, nw) {
 
-        let result = 0;
+        var result = 0;
 
-        for (let i = 0; i < nw.oldBoxes.length; i++) {
+        for (var i = 0; i < nw.oldBoxes.length; i++) {
 
-            const b = nw.oldBoxes[i];
+            var b = nw.oldBoxes[i];
 
             result = result + pl.allocatedMines[b.uid];
         }
@@ -552,7 +556,7 @@ class ProbabilityEngine {
             console.log("Probability Engine recursision = " + recursions);
         }
 
-        const result = [];
+        var result = [];
 
         // if there is only one box left to put the missing mines we have reach the end of this branch of recursion
         if (nw.newBoxes.length - index == 1) {
@@ -582,13 +586,14 @@ class ProbabilityEngine {
 
 
         // this is the recursion
-        const maxToPlace = Math.min(nw.newBoxes[index].maxMines, missingMines);
+        var maxToPlace = Math.min(nw.newBoxes[index].maxMines, missingMines);
 
-        for (let i = nw.newBoxes[index].minMines; i <= maxToPlace; i++) {
-            const npl = this.extendProbabilityLine(pl, nw.newBoxes[index], i);
+        for (var i = nw.newBoxes[index].minMines; i <= maxToPlace; i++) {
+            var npl = this.extendProbabilityLine(pl, nw.newBoxes[index], i);
 
-            const r1 = this.distributeMissingMines(npl, nw, missingMines - i, index + 1);
+            var r1 = this.distributeMissingMines(npl, nw, missingMines - i, index + 1);
             result.push(...r1);
+
         }
 
         return result;
@@ -601,19 +606,20 @@ class ProbabilityEngine {
         //console.log("Extended probability line: Adding " + mines + " mines to box " + newBox.uid);
         //console.log("Extended probability line before" + pl.mineBoxCount);
 
-        const combination = ProbabilityEngine.SMALL_COMBINATIONS[newBox.tiles.length][mines];
-        const bigCom = BigInt(combination);
+        var combination = this.SMALL_COMBINATIONS[newBox.tiles.length][mines];
+        var bigCom = BigInt(combination);
 
-        const newSolutionCount = pl.solutionCount * bigCom;
+        var newSolutionCount = pl.solutionCount * bigCom;
 
-        const result = new ProbabilityLine(this.boxes.length, newSolutionCount);
+        var result = new ProbabilityLine(this.boxes.length, newSolutionCount);
 
         result.mineCount = pl.mineCount + mines;
- 
+        //result.solutionCount = pl.solutionCount;
+
         // copy the probability array
 
         if (combination != 1) {
-            for (let i = 0; i < pl.mineBoxCount.length; i++) {
+            for (var i = 0; i < pl.mineBoxCount.length; i++) {
                 result.mineBoxCount[i] = pl.mineBoxCount[i] * bigCom;
             }
         } else {
@@ -636,7 +642,7 @@ class ProbabilityEngine {
 
         //console.log("At store probabilities");
 
-        const result = [];
+        var result = [];
 
         //this.checkCandidateDeadLocations();
 
@@ -649,7 +655,7 @@ class ProbabilityEngine {
         // crunch the new ones down to one line per mine count
         //var crunched = this.crunchByMineCount(this.workingProbs);
 
-        const crunched = this.workingProbs;
+        var crunched = this.workingProbs;
 
         if (crunched.length == 1) {
             this.checkEdgeIsIsolated();
@@ -657,15 +663,15 @@ class ProbabilityEngine {
 
         //solver.display("New data has " + crunched.size() + " entries");
 
-        for (let i = 0; i < crunched.length; i++) {
+        for (var i = 0; i < crunched.length; i++) {
 
             pl = crunched[i];
 
-            for (let j = 0; j < this.heldProbs.length; j++) {
+            for (var j = 0; j < this.heldProbs.length; j++) {
 
-                const epl = this.heldProbs[j];
+                var epl = this.heldProbs[j];
 
-                const npl = new ProbabilityLine(this.boxes.length);
+                var npl = new ProbabilityLine(this.boxes.length);
 
                 npl.mineCount = pl.mineCount + epl.mineCount;
 
@@ -673,10 +679,10 @@ class ProbabilityEngine {
 
                     npl.solutionCount = pl.solutionCount * epl.solutionCount;
 
-                    for (let k = 0; k < npl.mineBoxCount.length; k++) {
+                    for (var k = 0; k < npl.mineBoxCount.length; k++) {
 
-                        const w1 = pl.mineBoxCount[k] * epl.solutionCount;
-                        const w2 = epl.mineBoxCount[k] * pl.solutionCount;
+                        var w1 = pl.mineBoxCount[k] * epl.solutionCount;
+                        var w2 = epl.mineBoxCount[k] * pl.solutionCount;
                         npl.mineBoxCount[k] = w1 + w2;
 
                     }
@@ -697,11 +703,11 @@ class ProbabilityEngine {
         }
 
         // and combine them into a single probability line for each mine count
-        let mc = result[0].mineCount;
-        let npl = new ProbabilityLine(this.boxes.length);
+        var mc = result[0].mineCount;
+        var npl = new ProbabilityLine(this.boxes.length);
         npl.mineCount = mc;
 
-        for (let i = 0; i < result.length; i++) {
+        for (var i = 0; i < result.length; i++) {
 
             var pl = result[i];
 
@@ -713,7 +719,7 @@ class ProbabilityEngine {
             }
             npl.solutionCount = npl.solutionCount + pl.solutionCount;
 
-            for (let j = 0; j < pl.mineBoxCount.length; j++) {
+            for (var j = 0; j < pl.mineBoxCount.length; j++) {
                 npl.mineBoxCount[j] = npl.mineBoxCount[j] + pl.mineBoxCount[j];
             }
         }
@@ -731,13 +737,13 @@ class ProbabilityEngine {
         // sort the solutions by number of mines
         target.sort(function (a, b) { return sorter.compare(a,b) });
 
-        const result = [];
+        var result = [];
 
-        let current = null;
+        var current = null;
 
-        for (let i = 0; i < target.length; i++) {
+        for (var i = 0; i < target.length; i++) {
 
-            const pl = target[i];
+            var pl = target[i];
 
             if (current == null) {
                 current = target[i];
@@ -774,7 +780,7 @@ class ProbabilityEngine {
 
         npl.solutionCount = npl.solutionCount + pl.solutionCount;
 
-        for (let i = 0; i < pl.mineBoxCount.length; i++) {
+        for (var i = 0; i < pl.mineBoxCount.length; i++) {
             if (this.mask[i]) {  // if this box has been involved in this solution - if we don't do this the hash gets corrupted by boxes = 0 mines because they weren't part of this edge
                 npl.mineBoxCount[i] = npl.mineBoxCount[i] + pl.mineBoxCount[i];
             }
@@ -786,8 +792,8 @@ class ProbabilityEngine {
     // return any witness which hasn't been processed
     findFirstWitness() {
 
-        for (let i = 0; i < this.boxWitnesses.length; i++) {
-            const boxWit = this.boxWitnesses[i];
+        for (var i = 0; i < this.boxWitnesses.length; i++) {
+            var boxWit = this.boxWitnesses[i];
             if (!boxWit.processed) {
                 return new NextWitness(boxWit);
             }
@@ -799,19 +805,19 @@ class ProbabilityEngine {
     // look for the next witness to process
     findNextWitness(prevWitness) {
 
-        let bestTodo = 99999;
-        let bestWitness = null;
+        var bestTodo = 99999;
+        var bestWitness = null;
 
         // and find a witness which is on the boundary of what has already been processed
-        for (let i = 0; i < this.boxes.length; i++) {
-            const b = this.boxes[i];
+        for (var i = 0; i < this.boxes.length; i++) {
+            var b = this.boxes[i];
             if (b.processed) {
-                for (let j = 0; j < b.boxWitnesses.length; j++) {
-                    const w = b.boxWitnesses[j];
+                for (var j = 0; j < b.boxWitnesses.length; j++) {
+                    var w = b.boxWitnesses[j];
                     if (!w.processed) {
-                        let todo = 0;
-                        for (let k = 0; k < w.boxes.length; k++) {
-                            const b1 = w.boxes[k];
+                        var todo = 0;
+                        for (var k = 0; k < w.boxes.length; k++) {
+                            var b1 = w.boxes[k];
 
                             if (!b1.processed) {
                                 todo++;
@@ -837,15 +843,15 @@ class ProbabilityEngine {
         // if we are down here then there is no witness which is on the boundary, so we have processed a complete set of independent witnesses 
 
         // if playing for efficiency check all edges, slower but we get better information
-        if (this.playStyle != PLAY_STYLE_EFFICIENCY && !analysisMode && !this.options.fullProbability) {
+        if (this.playStyle != PLAY_STYLE_EFFICIENCY && !analysisMode) {
 
             // look to see if this sub-section of the edge has any certain clears
-            for (let i = 0; i < this.mask.length; i++) {
+            for (var i = 0; i < this.mask.length; i++) {
                 if (this.mask[i]) {
 
-                    let isClear = true;
-                    for (let j = 0; j < this.workingProbs.length; j++) {
-                        const wp = this.workingProbs[j];
+                    var isClear = true;
+                    for (var j = 0; j < this.workingProbs.length; j++) {
+                        var wp = this.workingProbs[j];
                         if (wp.mineBoxCount[i] != 0) {
                             isClear = false;
                             break;
@@ -853,28 +859,32 @@ class ProbabilityEngine {
                     }
                     if (isClear) {
                         // if the box is locally clear then store the tiles in it
-                        for (let j = 0; j < this.boxes[i].tiles.length; j++) {
+                        for (var j = 0; j < this.boxes[i].tiles.length; j++) {
 
-                            const tile = this.boxes[i].tiles[j];
+                            var tile = this.boxes[i].tiles[j];
 
                             this.writeToConsole(tile.asText() + " has been determined to be locally clear");
+                            //tile.setProbability(1);
                             this.localClears.push(tile);
                         }
                     }
 
-                    let isFlag = true;
-                    for (let j = 0; j < this.workingProbs.length; j++) {
-                        const wp = this.workingProbs[j];
+                    var isFlag = true;
+                    for (var j = 0; j < this.workingProbs.length; j++) {
+                        var wp = this.workingProbs[j];
                         if (wp.mineBoxCount[i] != wp.solutionCount * BigInt(this.boxes[i].tiles.length)) {
                             isFlag = false;
                             break;
                         }
                     }
                     if (isFlag) {
-                        // if the box contains all mines then store the tiles in it
-                        for (let j = 0; j < this.boxes[i].tiles.length; j++) {
-                            const tile = this.boxes[i].tiles[j];
+                        // if the box is locally clear then store the tiles in it
+                        for (var j = 0; j < this.boxes[i].tiles.length; j++) {
+
+                            var tile = this.boxes[i].tiles[j];
+
                             this.writeToConsole(tile.asText() + " has been determined to be locally a mine");
+                            //tile.setProbability(0);
                             this.minesFound.push(tile);
                         }
                     }
@@ -895,7 +905,7 @@ class ProbabilityEngine {
 
         // if we haven't compressed yet then do it now
         if (this.canDoDeadTileAnalysis) {
-            const sorter = new MergeSorter();
+            var sorter = new MergeSorter();
             this.workingProbs = this.crunchByMineCount(this.workingProbs, sorter);
         } else {
             this.canDoDeadTileAnalysis = true;
@@ -904,20 +914,22 @@ class ProbabilityEngine {
         // since we have calculated all the mines in an independent set of witnesses we can crunch them down and store them for later
 
         // get an unprocessed witness
-        const nw = this.findFirstWitness();
+        var nw = this.findFirstWitness();
         if (nw != null) {
             this.writeToConsole("Starting a new independent edge");
         }
 
-        // Store the probabilities for later consolidation
-        this.storeProbabilities();
+        // only crunch it down for non-trivial probability lines unless it is the last set - this is an efficiency decision
+        //if (this.workingProbs.length > 2 || nw == null) {
+            this.storeProbabilities();
 
-        // reset the working array so we can start building up one for the new set of witnesses
-        this.workingProbs = [new ProbabilityLine(this.boxes.length, BigInt(1))];
- 
-        // reset the mask indicating that no boxes have been processed 
-        this.mask.fill(false);
- 
+            // reset the working array so we can start building up one for the new set of witnesses
+            this.workingProbs = [new ProbabilityLine(this.boxes.length, BigInt(1))];
+            //this.workingProbs.push(new ProbabilityLine(this.boxes.length, BigInt(1)));
+
+            // reset the mask indicating that no boxes have been processed 
+            this.mask.fill(false);
+        //}
 
         // return the next witness to process
         return nw;
@@ -928,10 +940,10 @@ class ProbabilityEngine {
     // check the candidate dead locations with the information we have - remove those that aren't dead
     checkCandidateDeadLocations(checkPossible) {
 
-        let completeScan;
+        var completeScan;
         if (this.TilesOffEdge == 0) {
             completeScan = true;   // this indicates that every box has been considered in one sweep (only 1 independent edge)
-            for (let i = 0; i < this.mask.length; i++) {
+            for (var i = 0; i < this.mask.length; i++) {
                 if (!this.mask[i]) {
                     completeScan = false;
                     break;
@@ -948,24 +960,24 @@ class ProbabilityEngine {
         }
 
 
-        for (let i = 0; i < this.deadCandidates.length; i++) {
+        for (var i = 0; i < this.deadCandidates.length; i++) {
 
-            const dc = this.deadCandidates[i];
+            var dc = this.deadCandidates[i];
 
             if (dc.isAlive) {  // if this location isn't dead then no need to check any more
                 continue;
             }
 
             // only do the check if all the boxes have been analysed in this probability iteration
-            let boxesInScope = 0;
-            for (let j = 0; j < dc.goodBoxes.length; j++) {
-                const b = dc.goodBoxes[j];
+            var boxesInScope = 0;
+            for (var j = 0; j < dc.goodBoxes.length; j++) {
+                var b = dc.goodBoxes[j];
                 if (this.mask[b.uid]) {
                     boxesInScope++;
                 }
             }
-            for (let j = 0; j < dc.badBoxes.length; j++) {
-                const b = dc.badBoxes[j];
+            for (var j = 0; j < dc.badBoxes.length; j++) {
+                var b = dc.badBoxes[j];
                 if (this.mask[b.uid]) {
                     boxesInScope++;
                 }
@@ -985,11 +997,11 @@ class ProbabilityEngine {
                 continue;
             }
 
-            let okay = true;
-            let mineCount = 0;
-            line: for (let j = 0; j < this.workingProbs.length; j++) {
+            var okay = true;
+            var mineCount = 0;
+            line: for (var j = 0; j < this.workingProbs.length; j++) {
 
-                const pl = this.workingProbs[j];
+                var pl = this.workingProbs[j];
 
                 if (completeScan && pl.mineCount != this.minesLeft) {
                     continue line;
@@ -1002,11 +1014,11 @@ class ProbabilityEngine {
                 }
 
                 // all the bad boxes must be zero
-                for (let k = 0; k < dc.badBoxes.length; k++) {
+                for (var k = 0; k < dc.badBoxes.length; k++) {
 
-                    const b = dc.badBoxes[k];
+                    var b = dc.badBoxes[k];
 
-                    let neededMines;
+                    var neededMines;
                     if (b.uid == dc.myBox.uid) {
                         neededMines = BigInt(b.tiles.length - 1) * pl.solutionCount;
                     } else {
@@ -1021,10 +1033,10 @@ class ProbabilityEngine {
                     }
                 }
 
-                let tally = 0;
+                var tally = 0;
                 // the number of mines in the good boxes must always be the same
-                for (let k = 0; k < dc.goodBoxes.length; k++) {
-                    const b = dc.goodBoxes[k];
+                for (var k = 0; k < dc.goodBoxes.length; k++) {
+                    var b = dc.goodBoxes[k];
                     tally = tally + pl.allocatedMines[b.uid];
                 }
                 //boardState.display("Location " + dc.candidate.display() + " has mine tally " + tally);
@@ -1055,28 +1067,28 @@ class ProbabilityEngine {
     getCandidateDeadLocations() {
 
         // for each square on the edge
-        for (let i = 0; i < this.witnessed.length; i++) {
+        for (var i = 0; i < this.witnessed.length; i++) {
 
-            const tile = this.witnessed[i];
+            var tile = this.witnessed[i];
 
-            const adjBoxes = this.getAdjacentBoxes(tile);
+            var adjBoxes = this.getAdjacentBoxes(tile);
 
             if (adjBoxes == null) {  // this happens when the square isn't fully surrounded by boxes
                 continue;
             }
 
-            const dc = new DeadCandidate();
+            var dc = new DeadCandidate();
             dc.candidate = tile;
             dc.myBox = this.getBox(tile);
 
-            for (let j = 0; j < adjBoxes.length; j++) {
+            for (var j = 0; j < adjBoxes.length; j++) {
 
-                const box = adjBoxes[j];
+                var box = adjBoxes[j];
 
-                let good = true;
-                for (let k = 0; k < box.tiles.length; k++) {
+                var good = true;
+                for (var k = 0; k < box.tiles.length; k++) {
 
-                    const square = box.tiles[k];
+                    var square = box.tiles[k];
 
                     if (!square.isAdjacent(tile) && !(square.index == tile.index)) {
                         good = false;
@@ -1101,8 +1113,8 @@ class ProbabilityEngine {
 
         }
 
-        for (let i = 0; i < this.deadCandidates.length; i++) {
-            const dc = this.deadCandidates[i];
+        for (var i = 0; i < this.deadCandidates.length; i++) {
+            var dc = this.deadCandidates[i];
             this.writeToConsole(dc.candidate.asText() + " is candidate dead with " + dc.goodBoxes.length + " good boxes and " + dc.badBoxes.length + " bad boxes");
         }
 
@@ -1111,7 +1123,7 @@ class ProbabilityEngine {
     // get the box containing this tile
     getBox(tile) {
 
-        for (let i = 0; i < this.boxes.length; i++) {
+        for (var i = 0; i < this.boxes.length; i++) {
             if (this.boxes[i].contains(tile)) {
                 return this.boxes[i];
             }
@@ -1125,14 +1137,14 @@ class ProbabilityEngine {
     // return all the boxes adjacent to this tile
     getAdjacentBoxes(loc) {
 
-        const result = [];
+        var result = [];
 
-        const adjLocs = this.board.getAdjacent(loc);
+        var adjLocs = this.board.getAdjacent(loc);
 
          // get each adjacent location
-        for (let i = 0; i < adjLocs.length; i++) {
+        for (var i = 0; i < adjLocs.length; i++) {
 
-            let adjLoc = adjLocs[i];
+            var adjLoc = adjLocs[i];
 
             // we only want adjacent tile which are un-revealed
             if (!adjLoc.isCovered() || adjLoc.isSolverFoundBomb()) {
@@ -1140,16 +1152,16 @@ class ProbabilityEngine {
             }
 
             // find the box it is in
-            let boxFound = false;
-            for (let j = 0; j < this.boxes.length; j++) {
+            var boxFound = false;
+            for (var j = 0; j < this.boxes.length; j++) {
 
-                const box = this.boxes[j];
+                var box = this.boxes[j];
 
                 if (box.contains(adjLoc)) {
                     boxFound = true;
                     // is the box already included?
-                    let found = false;
-                    for (let k = 0; k < result.length; k++) {
+                    var found = false;
+                    for (var k = 0; k < result.length; k++) {
 
                         if (box.uid == result[k].uid) {
                             found = true;
@@ -1178,20 +1190,20 @@ class ProbabilityEngine {
     // an edge is isolated if every tile on it is completely surrounded by boxes also on the same edge
     checkEdgeIsIsolated() {
 
-        const edgeTiles = new Set();
-        const edgeWitnesses = new Set();
+        var edgeTiles = new Set();
+        var edgeWitnesses = new Set();
 
-        let everything = true;
+        var everything = true;
 
         // load each tile on this edge into a set
-        for (let i = 0; i < this.mask.length; i++) {
+        for (var i = 0; i < this.mask.length; i++) {
             if (this.mask[i]) {
                 //edgeTiles.add(...this.boxes[i].tiles);
-                for (let j = 0; j < this.boxes[i].tiles.length; j++) {
+                for (var j = 0; j < this.boxes[i].tiles.length; j++) {
                     edgeTiles.add(this.boxes[i].tiles[j]);
                 }
 
-                for (let j = 0; j < this.boxes[i].boxWitnesses.length; j++) {
+                for (var j = 0; j < this.boxes[i].boxWitnesses.length; j++) {
                     edgeWitnesses.add(this.boxes[i].boxWitnesses[j].tile);
                 }
  
@@ -1217,13 +1229,13 @@ class ProbabilityEngine {
         }
 
         // check whether every tile adjacent to the tiles on the edge is itself on the edge
-        for (let i = 0; i < this.mask.length; i++) {
+        for (var i = 0; i < this.mask.length; i++) {
             if (this.mask[i]) {
-                for (let j = 0; j < this.boxes[i].tiles.length; j++) {
-                    const tile = this.boxes[i].tiles[j];
-                    const adjTiles = this.board.getAdjacent(tile);
-                    for (let k = 0; k < adjTiles.length; k++) {
-                        const adjTile = adjTiles[k];
+                for (var j = 0; j < this.boxes[i].tiles.length; j++) {
+                    var tile = this.boxes[i].tiles[j];
+                    var adjTiles = this.board.getAdjacent(tile);
+                    for (var k = 0; k < adjTiles.length; k++) {
+                        var adjTile = adjTiles[k];
                         if (adjTile.isCovered() && !adjTile.isSolverFoundBomb() && !edgeTiles.has(adjTile)) {
                             this.writeToConsole("Not isolated because a tile's adjacent tiles isn't on the edge: " + tile.asText() + " ==> " + adjTile.asText());
                             return false;
@@ -1235,17 +1247,19 @@ class ProbabilityEngine {
 
         this.writeToConsole("*** Isolated Edge found ***");
 
-        const tiles = [...edgeTiles];
-        const witnesses = [...edgeWitnesses];
-        const mines = this.workingProbs[0].mineCount;
+        var tiles = [...edgeTiles];
+        var witnesses = [...edgeWitnesses];
+        var mines = this.workingProbs[0].mineCount;
         // build a web of the isolated edge and use it to build a brute force
-        const isolatedEdge = new ProbabilityEngine(this.board, witnesses, tiles, tiles.length, mines, this.options);
+        var isolatedEdge = new ProbabilityEngine(this.board, witnesses, tiles, tiles.length, mines, this.options);
         isolatedEdge.generateIndependentWitnesses();
-        const iterator = new WitnessWebIterator(isolatedEdge, tiles, -1);
+        var iterator = new WitnessWebIterator(isolatedEdge, tiles, -1);
 
-        const bruteForce = new Cruncher(this.board, iterator);
- 
+        var bruteForce = new Cruncher(this.board, iterator);
+        //BruteForce bruteForce = new BruteForce(boardState.getSolver(), boardState, isolatedEdge, mines, boardState.getSolver().preferences.BRUTE_FORCE_MAX, "Isolated Edge");
+
         this.isolatedEdgeBruteForce = bruteForce;
+
 
         return true;
     }
@@ -1256,25 +1270,27 @@ class ProbabilityEngine {
         this.remainingSquares = this.witnessed.length;
 
         // find a set of witnesses which don't share any squares (there can be many of these, but we just want one to use with the brute force iterator)
-        for (let i = 0; i < this.prunedWitnesses.length; i++) {
+        for (var i = 0; i < this.prunedWitnesses.length; i++) {
 
-            const w = this.prunedWitnesses[i];
+            var w = this.prunedWitnesses[i];
 
             //console.log("Checking witness " + w.tile.asText() + " for independence");
 
-            let okay = true;
-            for (let j = 0; j < this.independentWitnesses.length; j++) {
+            var okay = true;
+            for (var j = 0; j < this.independentWitnesses.length; j++) {
 
-                const iw = this.independentWitnesses[j];
+                var iw = this.independentWitnesses[j];
 
                 if (w.overlap(iw)) {
                     okay = false;
+                    //console.log("false");
                     break;
                 }
             }
 
             // split the witnesses into dependent ones and independent ones 
             if (okay) {
+                //console.log("true");
                 this.remainingSquares = this.remainingSquares - w.tiles.length;
                 this.independentIterations = this.independentIterations * combination(w.minesToFind, w.tiles.length);
                 this.independentMines = this.independentMines + w.minesToFind;
@@ -1292,39 +1308,45 @@ class ProbabilityEngine {
     // sum them together to create a definitive probability for each box
     calculateBoxProbabilities() {
 
-        const tally = [];
-        for (let i = 0; i < this.boxes.length; i++) {
+        var tally = [];
+        for (var i = 0; i < this.boxes.length; i++) {
             tally[i] = BigInt(0);
+            //hashTally[i] = BigInteger.ZERO;
         }
 
         // total game tally
-        let totalTally = BigInt(0);
+        var totalTally = BigInt(0);
 
         // outside a box tally
-        let outsideTally = BigInt(0);
+        var outsideTally = BigInt(0);
 
         //console.log("There are " + this.heldProbs.length + " different mine counts on the edge");
 
         // calculate how many mines 
-        for (let i = 0; i < this.heldProbs.length; i++) {
+        for (var i = 0; i < this.heldProbs.length; i++) {
 
-            const pl = this.heldProbs[i];
+            var pl = this.heldProbs[i];
 
             //console.log("Mine count is " + pl.mineCount + " with solution count " + pl.solutionCount + " mineBoxCount = " + pl.mineBoxCount);
 
             if (pl.mineCount >= this.minTotalMines) {    // if the mine count for this solution is less than the minimum it can't be valid
 
-                this.writeToConsole("Mines on Perimeter " + pl.mineCount);
-                const mult = combination(this.minesLeft - pl.mineCount, this.TilesOffEdge);  //# of ways the rest of the board can be formed
+                //if (mineCounts.put(pl.mineCount, pl.solutionCount) != null) {
+                //   System.out.println("Duplicate mines in probability Engine");
+                //}
+
+                //console.log("Mines left " + this.minesLeft + " mines on PL " + pl.mineCount + " squares left = " + this.squaresLeft);
+                var mult = combination(this.minesLeft - pl.mineCount, this.TilesOffEdge);  //# of ways the rest of the board can be formed
 
                 outsideTally = outsideTally + mult * BigInt(this.minesLeft - pl.mineCount) * (pl.solutionCount);
 
                 // this is all the possible ways the mines can be placed across the whole game
                 totalTally = totalTally + mult * (pl.solutionCount);
 
-                for (let j = 0; j < tally.length; j++) {
+                for (var j = 0; j < tally.length; j++) {
                     //console.log("mineBoxCount " + j + " is " + pl.mineBoxCount[j]);
                     tally[j] = tally[j] + (mult * pl.mineBoxCount[j]) / BigInt(this.boxes[j].tiles.length);
+                    //hashTally[i] = hashTally[i].add(pl.hashCount[i]);
                 }
             }
 
@@ -1332,7 +1354,7 @@ class ProbabilityEngine {
 
         this.minesFound = [];  // forget any mines we found on edges as we went along, we'll find them again here
         // for each box calculate a probability
-        for (let i = 0; i < this.boxes.length; i++) {
+        for (var i = 0; i < this.boxes.length; i++) {
 
             if (totalTally != 0) {
                 if (tally[i] == totalTally) {  // a mine
@@ -1354,17 +1376,23 @@ class ProbabilityEngine {
             //console.log("Box " + i + " has probabality " + this.boxProb[i]);
 
             // for each tile in the box allocate a probability to it
-            for (let j = 0; j < this.boxes[i].tiles.length; j++) {
+            for (var j = 0; j < this.boxes[i].tiles.length; j++) {
+                //console.log(this.boxes[i].tiles[j].asText() + " set to probability " + this.boxProb[i]);
+                //this.boxes[i].tiles[j].setProbability(this.boxProb[i]);
+
                 if (this.boxProb[i] == 0) {
+                    //console.log(this.boxes[i].tiles[j].asText() + " set to mine");
                     this.minesFound.push(this.boxes[i].tiles[j]);
+                    //this.boxes[i].tiles[j].setFoundBomb();
                 }
             }
 
         }
 
         // see if the lonely tiles are dead
-        for (let i = 0; i < this.lonelyTiles.length; i++) {
-            const dc = this.lonelyTiles[i];
+        //for (var dc in this.lonelyTiles) {
+        for (var i = 0; i < this.lonelyTiles.length; i++) {
+            var dc = this.lonelyTiles[i];
             if (this.boxProb[dc.myBox.uid] != 0 && this.boxProb[dc.myBox.uid] != 1) {   // a lonely tile is dead if not a definite mine or safe
                 this.writeToConsole("PE found Lonely tile " + dc.candidate.asText() + " is dead with value +" + dc.total);
                 this.deadTiles.push(dc.candidate);
@@ -1372,8 +1400,8 @@ class ProbabilityEngine {
         }
 
         // add the dead locations we found
-        for (let i = 0; i < this.deadCandidates.length; i++) {
-            const dc = this.deadCandidates[i];
+        for (var i = 0; i < this.deadCandidates.length; i++) {
+            var dc = this.deadCandidates[i];
             if (!dc.isAlive && this.boxProb[dc.myBox.uid] != 0 && this.boxProb[dc.myBox.uid] != 1) {   // if it is dead and not a definite mine or safe
                 this.writeToConsole("PE found " + dc.candidate.asText() + " to be dead with value +" + dc.total);
                 this.deadTiles.push(dc.candidate);
@@ -1382,6 +1410,7 @@ class ProbabilityEngine {
 
         // avoid divide by zero
         if (this.TilesOffEdge != 0 && totalTally != BigInt(0)) {
+            //offEdgeProbability = 1 - outsideTally / (totalTally * BigInt(this.squaresLeft));
             this.offEdgeProbability = 1 - divideBigInt(outsideTally, totalTally * BigInt(this.TilesOffEdge), 6);
         } else {
             this.offEdgeProbability = 0;
@@ -1393,7 +1422,7 @@ class ProbabilityEngine {
         // count how many clears we have
         this.localClears = [];
         if (totalTally > 0) {
-            for (let i = 0; i < this.boxes.length; i++) {
+            for (var i = 0; i < this.boxes.length; i++) {
                 if (tally[i] == 0) {
                     this.clearCount = this.clearCount + this.boxes[i].tiles.length;
                     this.localClears.push(...this.boxes[i].tiles);
@@ -1402,20 +1431,20 @@ class ProbabilityEngine {
         }
 
         // see if we can find a guess which is better than outside the boxes
-        let hwm = 0;
+        var hwm = 0;
 
-        for (let i = 0; i < this.boxes.length; i++) {
+        for (var i = 0; i < this.boxes.length; i++) {
 
-            const b = this.boxes[i];
-            let boxLiving = false;
+            var b = this.boxes[i];
 
             // a box is dead if all its tiles are dead
             if (this.deadTiles.length > 0) {
-                for (let j = 0; j < this.boxes[i].tiles.length; j++) {
-                    const tile = this.boxes[i].tiles[j];
+                var boxLiving = false;
+                for (var j = 0; j < this.boxes[i].tiles.length; j++) {
+                    var tile = this.boxes[i].tiles[j];
 
-                    let tileLiving = true;
-                    for (let k = 0; k < this.deadTiles.length; k++) {
+                    var tileLiving = true;
+                    for (var k = 0; k < this.deadTiles.length; k++) {
                         if (this.deadTiles[k].isEqual(tile)) {
                             tileLiving = false;
                             break;
@@ -1427,7 +1456,7 @@ class ProbabilityEngine {
                     }
                 }
             } else {  // if there are no dead tiles then there is nothing to check
-                boxLiving = true;
+                var boxLiving = true;
             }
 
 
@@ -1461,7 +1490,13 @@ class ProbabilityEngine {
         //solver.display("Squares left " + this.squaresLeft + " squares analysed " + web.getSquares().size());
 
         // if the outside probability is the best then return an empty list
-        let test;
+        var test;
+        //if (offEdgeBest) {
+        //	solver.display("Best probability is off the edge " + bestProbability + " but will look for options on the edge only slightly worse");
+        //	//test = bestProbability.multiply(Solver.EDGE_TOLERENCE);
+        //	test = bestProbability.multiply(freshhold);
+        //} else 
+
         if (this.bestProbability == 1) {  // if we have a probability of one then don't allow lesser probs to get a look in
             test = this.bestProbability;
         } else {
@@ -1470,14 +1505,16 @@ class ProbabilityEngine {
 
         this.writeToConsole("Best probability is " + this.bestProbability + " freshhold is " + test);
 
-        for (let i = 0; i < this.boxProb.length; i++) {
+        for (var i = 0; i < this.boxProb.length; i++) {
             if (this.boxProb[i] >= test) {
-                for (let j = 0; j < this.boxes[i].tiles.length; j++) {
-                    const squ = this.boxes[i].tiles[j];
+                for (var j = 0; j < this.boxes[i].tiles.length; j++) {
+                    var squ = this.boxes[i].tiles[j];
+
+                    //best.push(new Action(squ.x, squ.y, this.boxProb[i]));
 
                     //  exclude dead tiles 
-                    let dead = false;
-                    for (let k = 0; k < this.deadTiles.length; k++) {
+                    var dead = false;
+                    for (var k = 0; k < this.deadTiles.length; k++) {
                         if (this.deadTiles[k].isEqual(squ)) {
                             dead = true;
                             break;
@@ -1509,7 +1546,7 @@ class ProbabilityEngine {
     // forces a box to contain a tile which isn't a mine.  If the location isn't in a box false is returned.
     setMustBeEmpty(tile) {
 
-        const box = this.getBox(tile);
+        var box = this.getBox(tile);
 
         if (box == null) {
             this.validWeb = false;
@@ -1547,7 +1584,7 @@ class MergeSorter {
 
         this.checks = Array(boxes.length);
 
-        for (let i = 0; i < boxes.length; i++) {
+        for (var i = 0; i < boxes.length; i++) {
             this.checks[i] = boxes[i].uid;
         }
 
@@ -1555,14 +1592,14 @@ class MergeSorter {
 
     compare(p1, p2) {
 
-        let c = p1.mineCount - p2.mineCount;
+        var c = p1.mineCount - p2.mineCount;
 
         if (c != 0) {
             return c;
         }
 
-        for (let i = 0; i < this.checks.length; i++) {
-            const index = this.checks[i];
+        for (var i = 0; i < this.checks.length; i++) {
+            var index = this.checks[i];
 
             c = p1.allocatedMines[index] - p2.allocatedMines[index];
 
@@ -1581,6 +1618,10 @@ class MergeSorter {
  * Used to hold a solution
  */
 class ProbabilityLine {
+
+    //constructor(boxCount) {
+    //    constructor(boxCount, BigInt(0));
+    //} 
 
 	constructor(boxCount, solutionCount) {
 		
@@ -1607,9 +1648,9 @@ class NextWitness {
         this.oldBoxes = [];
         this.newBoxes = [];
 
-        for (let i = 0; i < this.boxWitness.boxes.length; i++) {
+        for (var i = 0; i < this.boxWitness.boxes.length; i++) {
 
-            const box = this.boxWitness.boxes[i];
+            var box = this.boxWitness.boxes[i];
             if (box.processed) {
                 this.oldBoxes.push(box);
             } else {
@@ -1634,10 +1675,10 @@ class BoxWitness {
         this.processed = false;
         this.minesToFind = tile.getValue();   
 
-        const adjTile = board.getAdjacent(tile);
+        var adjTile = board.getAdjacent(tile);
 
         // determine how many mines are left to find and store adjacent tiles
-        for (let i = 0; i < adjTile.length; i++) {
+        for (var i = 0; i < adjTile.length; i++) {
             if (adjTile[i].isSolverFoundBomb()) {
                 this.minesToFind--;
             } else if (adjTile[i].isCovered()) {
@@ -1653,13 +1694,13 @@ class BoxWitness {
             return false;
         }
 
-        top: for (let i = 0; i < boxWitness.tiles.length; i++) {
+        top: for (var i = 0; i < boxWitness.tiles.length; i++) {
 
-            const tile1 = boxWitness.tiles[i];
+            var tile1 = boxWitness.tiles[i];
 
-            for (let j = 0; j < this.tiles.length; j++) {
+            for (var j = 0; j < this.tiles.length; j++) {
 
-                const tile2 = this.tiles[j];
+                var tile2 = this.tiles[j];
 
                 if (tile1.isEqual(tile2)) {  // if they share a tile then return true
                     return true;
@@ -1686,12 +1727,12 @@ class BoxWitness {
             return false;
         }
 
-        for (let i = 0; i < this.tiles.length; i++) {
+        for (var i = 0; i < this.tiles.length; i++) {
 
-            const l1 = this.tiles[i];
+            var l1 = this.tiles[i];
 
-            let found = false;
-            for (let j = 0; j < boxWitness.tiles.length; j++) {
+            var found = false;
+            for (var j = 0; j < boxWitness.tiles.length; j++) {
                 if (boxWitness.tiles[j].index == l1.index) {
                     found = true;
                     break;
@@ -1746,7 +1787,7 @@ class Box {
 		
 		this.boxWitnesses = [];
 		
-		for (let i=0; i < boxWitnesses.length; i++) {
+		for (var i=0; i < boxWitnesses.length; i++) {
 			if (tile.isAdjacent(boxWitnesses[i].tile)) {
                 this.boxWitnesses.push(boxWitnesses[i]);
                 boxWitnesses[i].addBox(this);
@@ -1766,7 +1807,7 @@ class Box {
 			return false;
 		}
 		
-		for (let i=0; i < this.boxWitnesses.length; i++) {
+		for (var i=0; i < this.boxWitnesses.length; i++) {
 			if (!this.boxWitnesses[i].tile.isAdjacent(tile)) {
 				return false;
 			}
@@ -1786,7 +1827,7 @@ class Box {
         this.maxMines = Math.min(this.tiles.length, minesLeft);  // can't have more mines then there are tiles to put them in or mines left to discover
         this.minMines = 0;
 
-        for (let i = 0; i < this.boxWitnesses.length; i++) {
+        for (var i = 0; i < this.boxWitnesses.length; i++) {
             if (this.boxWitnesses[i].minesToFind < this.maxMines) {  // can't have more mines than the lowest constraint
                 this.maxMines = this.boxWitnesses[i].minesToFind;
             }
@@ -1810,7 +1851,7 @@ class Box {
     contains(tile) {
 
         // return true if the given tile is in this box
-        for (let i = 0; i < this.tiles.length; i++) {
+        for (var i = 0; i < this.tiles.length; i++) {
             if (this.tiles[i].index == tile.index) {
                 return true;
             }

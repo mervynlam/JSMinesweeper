@@ -11,22 +11,24 @@ class Tile {
 		this.value = 0;
 		this.is_flagged = false;
 		this.foundBomb = false
-        this.is_bomb = null;   // this gets set when the game is lost
+        this.is_bomb;   // this gets set when the game is lost
         this.exploded = false;  // this gets set if this tile was the one clicked
         this.index = index;
 
         this.onEdge = false;
         this.hint = false;
-        this.probability = 0;
+        this.probability;
 		this.hintText = "";
-		this.hasHint = false;
 
-		this.efficiencyValue = "";   // the value we need to be to be chordable
-		this.efficiencyProbability = 0;  // the probability of being that value
+		this.efficiencyValue;   // the value we need to be to be chordable
+		this.efficiencyProbability;  // the probability of being that value
 		this.efficiencyText = "";  
 
-		Object.seal(this); // prevent new values being created
 	}
+
+	//reveal() {
+	//	this.is_covered = false;
+	//}
 
 	getX() {
 		return this.x;
@@ -39,8 +41,8 @@ class Tile {
 	// returns true if the tile provided is adjacent to this tile
 	isAdjacent(tile) {
 		
-		const dx = Math.abs(this.x - tile.x);
-		const dy = Math.abs(this.y - tile.y);
+		var dx = Math.abs(this.x - tile.x);
+		var dy = Math.abs(this.y - tile.y);
 		
 		// adjacent and not equal
 		if (dx < 2 && dy < 2 && !(dx == 0 && dy == 0)) {
@@ -73,10 +75,6 @@ class Tile {
 			return this.hintText + this.efficiencyText;
         }
 
-    }
-
-	getHasHint() {
-		return this.hasHint;
     }
 
     setProbability(prob, progress) {
@@ -113,7 +111,6 @@ class Tile {
 		this.efficiencyValue = null;
 		this.efficiencyProbability = 0;
 		this.efficiencyText = "";
-		this.probability = 0;
     }
 
     setOnEdge() {
