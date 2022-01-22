@@ -1922,49 +1922,61 @@ function showMessage(text) {
 
 function getWomGameWs(womId) {
     //wom 的ws获取局面信息
-    var ws = new WomWebsocket(womId, (msg) => {
-        var json = JSON.parse(msg.slice(2))
-        // console.log(json)
-        
-        var sizex = json[1][1][0]['sizeX']
-        var sizey = json[1][1][0]['sizeY']
-        var mines = json[1][1][0]['mines']
-        //修改地图大小
-        newGame(sizex, sizey, mines, 0);
-        //局面
-        var json_board = json[1][1][1]['t']
-        //对应位置的状态
-        var json_status = json[1][1][1]['o']
-        //雷的状态
-        var json_flags = json[1][1][1]['f']
-        var flag = 0;
-        //循环填充局面
-        for (var y = 0; y < sizey; ++y) {
-            for (var x = 0; x < sizex; ++x) {
-                var index = x * sizey + y
-                if (json_status[index] == 1) {
-                    var nums = json_board[index];
-                    setXYNums(x, y, nums)
-                } else {
-                    if (json_flags[index] == 0) {
-                        setXYCovered(x, y, true)
-                    } else {
-                        setXYFlag(x, y)
-                        flag++;
-                    }
-                }
-            }
-        }
-        //修改剩余雷数
-        board.bombs_left = mines - flag;
-        board.num_bombs = mines;
-        window.requestAnimationFrame(() => updateMineCount(board.bombs_left));
-    })
+    var ws = new WomWebsocket(womId, (msg) => loadBoard(msg))
     ws.connect()
-    // var sid = ws.getSid()
 
 }
 
+//填充地图
+function loadBoard(msg) {
+    var json = JSON.parse(msg.slice(2))
+    // console.log(json)
+    
+    var sizex = json[1][1][0]['sizeX']
+    var sizey = json[1][1][0]['sizeY']
+    var mines = json[1][1][0]['mines']
+    //修改tile size
+    if (sizex > 65) {
+        document.getElementById("tilesize").value = 16
+    } else {
+        document.getElementById("tilesize").value = 24
+    }
+    changeTileSize()
+    //修改地图大小
+    newGame(sizex, sizey, mines, 0);
+    //局面
+    var json_board = json[1][1][1]['t']
+    //对应位置的状态
+    var json_status = json[1][1][1]['o']
+    //雷的状态
+    var json_flags = json[1][1][1]['f']
+    var flag = 0;
+    //循环填充局面
+    for (var y = 0; y < sizey; ++y) {
+        for (var x = 0; x < sizex; ++x) {
+            var index = x * sizey + y
+            if (json_status[index] == 1) {
+                var nums = json_board[index];
+                setXYNums(x, y, nums)
+            } else {
+                if (json_flags[index] == 0) {
+                    setXYCovered(x, y, true)
+                } else {
+                    setXYFlag(x, y)
+                    flag++;
+                }
+            }
+        }
+    }
+    //修改剩余雷数
+    board.bombs_left = mines - flag;
+    board.num_bombs = mines;
+    window.requestAnimationFrame(() => updateMineCount(board.bombs_left));
+    doAnalysis()
+
+}
+
+//设置x,y位置为数字num
 function setXYNums(x, y, nums) {
     var tile = board.getTileXY(parseInt(x),parseInt(y))
     tile.setValue(nums);
@@ -1973,6 +1985,7 @@ function setXYNums(x, y, nums) {
     window.requestAnimationFrame(() => renderTiles([tile]));
 }
 
+//设置x,y位置是否打开
 function setXYCovered(x, y, is_covered) {
     var tile = board.getTileXY(parseInt(x),parseInt(y))
     if (tile == undefined) console.log("undefined", x, y)
@@ -1981,6 +1994,7 @@ function setXYCovered(x, y, is_covered) {
     window.requestAnimationFrame(() => renderTiles([tile]));
 }
 
+//修改x,y位置旗子
 function setXYFlag(x, y) {
     var tile = board.getTileXY(parseInt(x),parseInt(y))
     tile.toggleFlag();
