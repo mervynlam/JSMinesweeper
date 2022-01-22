@@ -191,6 +191,9 @@ async function startup() {
     //bulkRun(5678, 1000);
 
     showMessage("Welcome to minesweeper solver dedicated to Annie");
+
+    setAnalysis();
+    console.log("setAnalysis after startup")
 }
 
 // launch a floating window to store/retrieve from local storage
