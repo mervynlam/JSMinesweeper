@@ -1923,9 +1923,9 @@ function showMessage(text) {
     messageLine.innerHTML = text;
 }
 
-function getWomGameWs(womId) {
+function getWomGameWs(womId, server) {
     //wom 的ws获取局面信息
-    var ws = new WomWebsocket(womId, (msg) => loadBoard(msg))
+    var ws = new WomWebsocket(womId, server, (msg) => loadBoard(msg))
     ws.connect()
 
 }
@@ -1940,7 +1940,7 @@ function loadBoard(msg) {
     var mines = json[1][1][0]['mines']
     //修改tile size
     if (sizex > 65) {
-        document.getElementById("tilesize").value = 16
+        document.getElementById("tilesize").value = 20
     } else {
         document.getElementById("tilesize").value = 24
     }
@@ -1975,7 +1975,7 @@ function loadBoard(msg) {
     board.bombs_left = mines - flag;
     board.num_bombs = mines;
     window.requestAnimationFrame(() => updateMineCount(board.bombs_left));
-    doAnalysis()
+    // doAnalysis()
 
 }
 

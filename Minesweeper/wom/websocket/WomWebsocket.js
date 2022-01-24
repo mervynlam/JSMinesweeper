@@ -5,7 +5,7 @@
 
 class WomWebsocket {
 
-    constructor(gameId, callback) {
+    constructor(gameId, server, callback) {
 
         this.gameId = gameId
         this.authKey = '95af4c2f98686cdf2a88aae08e570bc5'
@@ -16,11 +16,12 @@ class WomWebsocket {
         this.sent = false
         this.sendCount = 0
         this.callback = callback
+        this.server = server
     }
 
     getSid(orig_sid) {
         const request = new XMLHttpRequest();
-        var url='https://hong3.minesweeper.online/mine-websocket/?authKey='+this.authKey+'&session='+this.session+'&userId='+this.userId+'&EIO=3&transport=polling';
+        var url='https://'+this.server+'.minesweeper.online/mine-websocket/?authKey='+this.authKey+'&session='+this.session+'&userId='+this.userId+'&EIO=3&transport=polling';
         if (orig_sid) {
             url += '&sid=' + orig_sid
             request.open("GET", url, false);
@@ -40,7 +41,7 @@ class WomWebsocket {
         var sid = this.getSid()
         this.getSid(sid)
         if (window.WebSocket) {
-            var url = 'wss://hong3.minesweeper.online/mine-websocket/?authKey='+this.authKey+'&session='+this.session+'&userId='+this.userId+'&EIO=3&transport=websocket&sid='+sid
+            var url = 'wss://'+this.server+'.minesweeper.online/mine-websocket/?authKey='+this.authKey+'&session='+this.session+'&userId='+this.userId+'&EIO=3&transport=websocket&sid='+sid
             this.connection = new WebSocket(url);
         }else {
             //否则报错

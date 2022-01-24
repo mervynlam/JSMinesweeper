@@ -94,6 +94,23 @@
         </div>
 
         <div style="margin-top: 10px;">
+            <label>Server:</label>
+            <select id="server">
+                <option value="war1">Poland - war1</option>
+                <option value="hong4">China - hong4</option>
+                <option selected value="hong3">China - hong3</option>
+                <option value="tok1">Japan - tok1</option>
+                <option value="tok2">Japan - tok2</option>
+                <option value="sing1">Singapore - sing1</option>
+                <option value="los1">USA - los1</option>
+                <option value="chic1">USA - chic1</option>
+                <option value="dal1">USA - dal1</option>
+                <option value="new1">USA - new1</option>
+                <option value="atl1">USA - atl1</option>
+            </select>
+        </div>
+
+        <div style="margin-top: 10px;">
             <label>Style:</label>
             <select id="playstyle">
                 <option value="flag">Flagging</option>
@@ -125,6 +142,7 @@
             <label><input type="checkbox" class="checkbox" id="lockMineCount" /> <span><u>L</u>ock mine count</span></label>
         </div>
 
+        <label><input type="checkbox" class="checkbox" id="lockWom" /> <span><u>U</u>nlock</span></label>
         <button type="button" style="margin-top: 1em;" id="AnalysisButton" onclick="doAnalysis()"><u>A</u>nalyse</button>
 
     </nav>
@@ -330,8 +348,13 @@
         }
 
         function getWomGame() {
-            var womId = document.getElementById("womId").value;
-            getWomGameWs(womId)
+            // if (document.getElementById('lockWom').checked) {
+                var womId = document.getElementById("womId").value;
+                var server = document.getElementById("server").value;
+                getWomGameWs(womId, server)
+            // } else {
+                // console.log(document.getElementById('lockWom').checked)
+            // }
         }
 
         function init() {
