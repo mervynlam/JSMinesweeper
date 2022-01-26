@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="resources/images/flagged.png" />
     <title>Minesweeper solver</title>
 </head>
-<body style="position: absolute; left:0px; right:0px; top:0px; bottom:0px; zoom: 1.0;" onresize="browserResized()" onload="load_images()" onunload="exiting()">
+<body style="position: absolute; left:0px; right:0px; top:0px; bottom:0px; zoom: 1.0;" onresize="browserResized()" onload="init()" onunload="exiting()">
 
     <!-- Title at the top -->
     <h1>
@@ -69,6 +69,31 @@
 
         <button type="button" style="margin-top: 0em;" id="repeatGame" onclick="playAgain()">Play again</button>
 
+        <div id="womDiv">
+            <div class="block">
+                <label>womId:</label>
+                <input id="womId" type="text" />
+            </div>
+            <button style="margin-top: 1em;" id="localStorageButton" onclick="getWomGame()">Get Wom Game</button>
+        </div>
+
+        <div style="margin-top: 10px;">
+            <label>Server:</label>
+            <select id="server">
+                <option value="war1">Poland - war1</option>
+                <option value="hong4">China - hong4</option>
+                <option selected value="hong3">China - hong3</option>
+                <option value="tok1">Japan - tok1</option>
+                <option value="tok2">Japan - tok2</option>
+                <option value="sing1">Singapore - sing1</option>
+                <option value="los1">USA - los1</option>
+                <option value="chic1">USA - chic1</option>
+                <option value="dal1">USA - dal1</option>
+                <option value="new1">USA - new1</option>
+                <option value="atl1">USA - atl1</option>
+            </select>
+        </div>
+
         <div style="margin-top: 10px;">
             <label>Style:</label>
             <select id="playstyle">
@@ -116,6 +141,7 @@
             <label><input type="checkbox" class="checkbox" id="lockMineCount" /> <span><u>L</u>ock mine count</span></label>
         </div>
 
+        <label><input type="checkbox" class="checkbox" id="lockWom" /> <span><u>U</u>nlock</span></label>
         <button type="button" style="margin-top: 1em;" id="AnalysisButton" onclick="doAnalysis()"><u>A</u>nalyse</button>
 
     </nav>
@@ -182,6 +208,8 @@
 
     <script src="Minesweeper/client/Board.js" type="text/javascript"></script>
     <script src="Minesweeper/client/Tile.js" type="text/javascript"></script>
+
+    <script src="Minesweeper/wom/websocket/WomWebsocket.js" type="text/javascript"></script>
 
     <script src="Minesweeper/client/solver_main.js" type="text/javascript"></script>
     <script src="Minesweeper/client/solver_probability_engine.js" type="text/javascript"></script>
@@ -316,6 +344,21 @@
 
             document.getElementById("custom").checked = true;
 
+        }
+
+        function getWomGame() {
+            // if (document.getElementById('lockWom').checked) {
+                var womId = document.getElementById("womId").value;
+                var server = document.getElementById("server").value;
+                getWomGameWs(womId, server)
+            // } else {
+                // console.log(document.getElementById('lockWom').checked)
+            // }
+        }
+
+        function init() {
+            load_images()
+            // setAnalysis()
         }
 
     </script>
