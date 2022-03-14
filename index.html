@@ -74,7 +74,7 @@
                 <label>womId:</label>
                 <input id="womId" type="text" />
             </div>
-            <button style="margin-top: 1em;" id="paste" onclick="paste()">Paste</button>
+            <button style="margin-top: 1em;" id="paste" onclick="paste()">Paste And Solve</button>
             <button style="margin-top: 1em;" id="localStorageButton" onclick="getWomGame()">Get Wom Game</button>
         </div>
 
@@ -365,6 +365,7 @@
         function paste() {
             navigator.clipboard.readText().then(
                 clipText => document.getElementById("womId").value = clipText);
+            getWomGame()
         }
 
     </script>

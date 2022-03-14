@@ -2009,7 +2009,7 @@ function loadBoard(msg) {
     board.bombs_left = mines - flag;
     board.num_bombs = mines;
     window.requestAnimationFrame(() => updateMineCount(board.bombs_left));
-    // doAnalysis()
+    doAnalysis()
 
 }
 
