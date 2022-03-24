@@ -365,7 +365,9 @@
         function paste() {
             navigator.clipboard.readText().then(
                 clipText => document.getElementById("womId").value = clipText);
-            getWomGame()
+            setTimeout(_=>{
+                getWomGame()
+            },200)
         }
 
     </script>
